@@ -1,11 +1,12 @@
-import { Link, Outlet, useRouterState } from "@tanstack/react-router";
+import { Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import {
   LayoutDashboard, FolderKanban, Zap, ListChecks, Users, BarChart3, Settings,
-  Search, Bell, Plus, Command, CalendarDays, Activity, Menu, Sun,
+  Search, Bell, Plus, Command, CalendarDays, Activity, Menu, Sun, LogOut,
 } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { MemberAvatar } from "../shared/Avatar";
+import { logout } from "@/services/auth.service";
 
 type NavItem = { to: string; label: string; icon: typeof LayoutDashboard; badge?: string };
 
@@ -41,9 +42,16 @@ export function AppShell({
 }) {
   const items = role === "admin" ? adminNav : userNav;
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
   const profileId = role === "admin" ? "m1" : "m2";
   const profileLabel = role === "admin" ? "Admin · Workspace owner" : "Member · Engineering";
+
+  function handleLogout() {
+    logout();
+    setMobileOpen(false);
+    void navigate({ to: "/login" });
+  }
 
   return (
     <div className="flex h-screen bg-background text-foreground font-sans overflow-hidden">
@@ -128,6 +136,17 @@ export function AppShell({
               <div className="text-[10px] text-muted-foreground truncate">{profileLabel}</div>
             </div>
           </div>
+          <button
+            type="button"
+            onClick={handleLogout}
+            className={cn(
+              "mt-2 flex w-full items-center gap-3 px-3 py-2 rounded-md text-sm transition-all group",
+              "text-muted-foreground hover:bg-muted hover:text-foreground",
+            )}
+          >
+            <LogOut className="size-4 shrink-0 transition-transform group-hover:scale-110" />
+            <span className="flex-1 text-left">Logout</span>
+          </button>
         </div>
       </aside>
 

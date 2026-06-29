@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 
 export function AuthLayout({
@@ -108,8 +108,8 @@ export function AuthLayout({
 }
 
 export function AuthInput({
-  label, type = "text", placeholder, right,
-}: { label: string; type?: string; placeholder?: string; right?: ReactNode }) {
+  label, type = "text", placeholder, right, className, ...props
+}: { label: string; type?: string; placeholder?: string; right?: ReactNode } & InputHTMLAttributes<HTMLInputElement>) {
   return (
     <label className="block mb-4">
       <div className="flex justify-between mb-1.5">
@@ -119,22 +119,34 @@ export function AuthInput({
       <input
         type={type}
         placeholder={placeholder}
-        className="w-full bg-card border border-border focus:border-primary focus:ring-2 focus:ring-primary/15 rounded-md px-3 py-2 text-sm outline-none transition-all"
+        className={`w-full bg-card border border-border focus:border-primary focus:ring-2 focus:ring-primary/15 rounded-md px-3 py-2 text-sm outline-none transition-all disabled:cursor-not-allowed disabled:opacity-60 ${className ?? ""}`}
+        {...props}
       />
     </label>
   );
 }
 
-export function AuthButton({ children, variant = "primary" }: { children: ReactNode; variant?: "primary" | "outline" }) {
+export function AuthButton({
+  children,
+  variant = "primary",
+  className,
+  ...props
+}: { children: ReactNode; variant?: "primary" | "outline" } & ButtonHTMLAttributes<HTMLButtonElement>) {
   if (variant === "outline") {
     return (
-      <button className="w-full border border-border bg-card hover:bg-muted py-2 rounded-md text-sm font-medium flex items-center justify-center gap-2 transition-colors">
+      <button
+        className={`w-full border border-border bg-card hover:bg-muted py-2 rounded-md text-sm font-medium flex items-center justify-center gap-2 transition-colors disabled:cursor-not-allowed disabled:opacity-60 ${className ?? ""}`}
+        {...props}
+      >
         {children}
       </button>
     );
   }
   return (
-    <button className="w-full gradient-primary text-white py-2 rounded-md text-sm font-semibold hover:opacity-95 shadow-glow transition-all">
+    <button
+      className={`w-full gradient-primary text-white py-2 rounded-md text-sm font-semibold hover:opacity-95 shadow-glow transition-all disabled:cursor-not-allowed disabled:opacity-60 ${className ?? ""}`}
+      {...props}
+    >
       {children}
     </button>
   );

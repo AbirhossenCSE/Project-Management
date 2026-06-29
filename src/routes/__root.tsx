@@ -6,10 +6,13 @@ import {
   useRouter,
   HeadContent,
   Scripts,
+  useNavigate,
 } from "@tanstack/react-router";
+import { useEffect } from "react";
 
 import appCss from "../styles.css?url";
 import { Toaster } from "@/components/ui/sonner";
+import { getMe, logout, tokenKey } from "@/services/auth.service";
 
 function NotFoundComponent() {
   return (
@@ -115,6 +118,30 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = typeof window !== "undefined" ? window.localStorage.getItem(tokenKey) : null;
+
+    if (!token) {
+      return;
+    }
+
+    let cancelled = false;
+
+    void getMe().catch(() => {
+      if (cancelled) {
+        return;
+      }
+
+      logout();
+      void navigate({ to: "/login" });
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [navigate]);
 
   return (
     <QueryClientProvider client={queryClient}>

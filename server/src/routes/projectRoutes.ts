@@ -16,6 +16,7 @@ router.use(requireAuth);
 router.post("/", createProject);
 router.get("/", getProjects);
 router.get("/:id", getProjectById);
+router.put("/:id", updateProject);
 router.patch("/:id", updateProject);
 router.delete("/:id", deleteProject);
 

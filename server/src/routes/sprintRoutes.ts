@@ -16,6 +16,7 @@ router.use(requireAuth);
 router.post("/", createSprint);
 router.get("/", getSprints);
 router.get("/:id", getSprintById);
+router.put("/:id", updateSprint);
 router.patch("/:id", updateSprint);
 router.delete("/:id", deleteSprint);
 
