@@ -2,9 +2,9 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { LayoutGrid, List, Plus, Search, Filter, DollarSign, Calendar } from "lucide-react";
 import { useState } from "react";
 import { projects } from "@/data/mock";
-import { ProgressBar } from "@/components/mpms/Progress";
-import { StatusBadge } from "@/components/mpms/Badges";
-import { AvatarGroup } from "@/components/mpms/Avatar";
+import { ProgressBar } from "@/components/shared/Progress";
+import { StatusBadge } from "@/components/shared/Badges";
+import { AvatarGroup } from "@/components/shared/Avatar";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/admin/projects")({
@@ -73,7 +73,7 @@ function Projects() {
                 <AvatarGroup ids={p.team} size={22} />
                 <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
                   <span className="inline-flex items-center gap-1"><Calendar className="size-3" />{p.dueDate.split(",")[0]}</span>
-                  <span className="inline-flex items-center gap-1"><DollarSign className="size-3" />{(p.budget/1000).toFixed(0)}k</span>
+                  <span className="inline-flex items-center gap-1"><DollarSign className="size-3" />{(p.budget / 1000).toFixed(0)}k</span>
                 </div>
               </div>
             </Link>
@@ -107,7 +107,7 @@ function Projects() {
                   <td className="px-5 py-3.5 text-muted-foreground text-xs">{p.client}</td>
                   <td className="px-5 py-3.5"><div className="w-28"><ProgressBar value={p.progress} /></div></td>
                   <td className="px-5 py-3.5"><AvatarGroup ids={p.team} size={22} /></td>
-                  <td className="px-5 py-3.5 font-mono text-xs">${(p.spent/1000).toFixed(0)}k / ${(p.budget/1000).toFixed(0)}k</td>
+                  <td className="px-5 py-3.5 font-mono text-xs">${(p.spent / 1000).toFixed(0)}k / ${(p.budget / 1000).toFixed(0)}k</td>
                   <td className="px-5 py-3.5"><StatusBadge status={p.status} /></td>
                   <td className="px-5 py-3.5 text-right font-mono text-xs text-muted-foreground">{p.dueDate}</td>
                 </tr>

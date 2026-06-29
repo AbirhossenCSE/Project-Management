@@ -1,8 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { projects, tasks } from "@/data/mock";
-import { ProgressBar } from "@/components/mpms/Progress";
-import { StatusBadge } from "@/components/mpms/Badges";
-import { AvatarGroup } from "@/components/mpms/Avatar";
+import { ProgressBar } from "@/components/shared/Progress";
+import { StatusBadge } from "@/components/shared/Badges";
+import { AvatarGroup } from "@/components/shared/Avatar";
 
 export const Route = createFileRoute("/app/projects")({
   component: () => {

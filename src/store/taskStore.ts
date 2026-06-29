@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from "react";
-import { tasks as seedTasks, type Task } from "./mock";
+import { tasks as seedTasks, type Task } from "../data/mock";
 
 let store: Task[] = [...seedTasks];
 const listeners = new Set<() => void>();

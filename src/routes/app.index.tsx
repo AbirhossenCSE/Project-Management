@@ -1,11 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { CheckCircle2, Clock, FolderKanban, MessageSquare } from "lucide-react";
-import { StatCard } from "@/components/mpms/StatCard";
-import { ProductivityArea } from "@/components/mpms/Charts";
+import { StatCard } from "@/components/shared/StatCard";
+import { ProductivityArea } from "@/components/shared/Charts";
 import { productivitySeries, tasks, findProject, activities } from "@/data/mock";
-import { PriorityBadge, TaskStatusBadge } from "@/components/mpms/Badges";
-import { ProgressBar, ProgressRing } from "@/components/mpms/Progress";
-import { MemberAvatar } from "@/components/mpms/Avatar";
+import { PriorityBadge, TaskStatusBadge } from "@/components/shared/Badges";
+import { ProgressBar, ProgressRing } from "@/components/shared/Progress";
+import { MemberAvatar } from "@/components/shared/Avatar";
 
 export const Route = createFileRoute("/app/")({
   component: UserDashboard,

@@ -5,7 +5,7 @@ import {
 } from "lucide-react";
 import { useState, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
-import { MemberAvatar } from "./Avatar";
+import { MemberAvatar } from "../shared/Avatar";
 
 type NavItem = { to: string; label: string; icon: typeof LayoutDashboard; badge?: string };
 

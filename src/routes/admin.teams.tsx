@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Mail, Plus } from "lucide-react";
 import { members } from "@/data/mock";
-import { MemberAvatar } from "@/components/mpms/Avatar";
-import { ProgressBar } from "@/components/mpms/Progress";
-import { Tag } from "@/components/mpms/Badges";
+import { MemberAvatar } from "@/components/shared/Avatar";
+import { ProgressBar } from "@/components/shared/Progress";
+import { Tag } from "@/components/shared/Badges";
 
 export const Route = createFileRoute("/admin/teams")({
   head: () => ({ meta: [{ title: "Teams — Admin" }] }),

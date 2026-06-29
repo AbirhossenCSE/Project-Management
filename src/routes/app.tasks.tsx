@@ -2,9 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
 import { useState } from "react";
 import { type Task, type TaskStatus } from "@/data/mock";
-import { useTasks } from "@/data/taskStore";
-import { KanbanBoard } from "@/components/mpms/Kanban";
-import { DeleteTaskDialog, TaskFormDialog } from "@/components/mpms/TaskFormDialog";
+import { useTasks } from "@/store/taskStore";
+import { KanbanBoard } from "@/components/shared/Kanban";
+import { DeleteTaskDialog, TaskFormDialog } from "@/components/shared/TaskFormDialog";
 
 const ME = "m2";
 

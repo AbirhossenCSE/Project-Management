@@ -1,10 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { FolderKanban, Zap, CheckCircle2, Users, Calendar, Plus, ChevronRight } from "lucide-react";
-import { StatCard } from "@/components/mpms/StatCard";
-import { ProductivityArea, StatusPie } from "@/components/mpms/Charts";
-import { ProgressBar, ProgressRing } from "@/components/mpms/Progress";
-import { StatusBadge } from "@/components/mpms/Badges";
-import { AvatarGroup, MemberAvatar } from "@/components/mpms/Avatar";
+import { StatCard } from "@/components/shared/StatCard";
+import { ProductivityArea, StatusPie } from "@/components/shared/Charts";
+import { ProgressBar, ProgressRing } from "@/components/shared/Progress";
+import { StatusBadge } from "@/components/shared/Badges";
+import { AvatarGroup, MemberAvatar } from "@/components/shared/Avatar";
 import { activities, productivitySeries, projects } from "@/data/mock";
 
 export const Route = createFileRoute("/admin/")({
@@ -48,7 +48,7 @@ function AdminDashboard() {
         <StatCard label="Team Members" value="32" icon={Users} accent="purple"
           footer={
             <div className="flex items-center justify-between">
-              <AvatarGroup ids={["m1","m2","m3","m4","m5"]} max={4} size={22} />
+              <AvatarGroup ids={["m1", "m2", "m3", "m4", "m5"]} max={4} size={22} />
               <span className="text-[11px] text-success font-medium">94% util.</span>
             </div>
           } />
@@ -137,16 +137,15 @@ function AdminDashboard() {
               {projects.slice(0, 3).map((p, i) => (
                 <div key={p.id} className="flex items-center gap-3">
                   <div className="text-center w-10 shrink-0">
-                    <div className="text-[10px] text-muted-foreground uppercase font-semibold">{["May","May","Jun"][i]}</div>
-                    <div className="text-base font-semibold font-mono">{["28","30","02"][i]}</div>
+                    <div className="text-[10px] text-muted-foreground uppercase font-semibold">{["May", "May", "Jun"][i]}</div>
+                    <div className="text-base font-semibold font-mono">{["28", "30", "02"][i]}</div>
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="text-xs font-medium truncate">{p.name}</div>
                     <div className="text-[10px] text-muted-foreground">{p.client}</div>
                   </div>
-                  <div className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${
-                    i === 0 ? "bg-destructive/10 text-destructive" : i === 1 ? "bg-warning/10 text-warning-foreground" : "bg-muted text-muted-foreground"
-                  }`}>
+                  <div className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${i === 0 ? "bg-destructive/10 text-destructive" : i === 1 ? "bg-warning/10 text-warning-foreground" : "bg-muted text-muted-foreground"
+                    }`}>
                     T-{[2, 5, 8][i]}d
                   </div>
                 </div>
@@ -165,11 +164,11 @@ function AdminDashboard() {
               </div>
             </div>
             <div className="space-y-2">
-              {["Engineering","Design","Product"].map((t, i) => (
+              {["Engineering", "Design", "Product"].map((t, i) => (
                 <div key={t} className="flex items-center gap-2 text-[11px]">
                   <span className="w-20 text-muted-foreground">{t}</span>
                   <ProgressBar value={[92, 78, 65][i]} tone={i === 0 ? "primary" : i === 1 ? "cool" : "warning"} className="flex-1" />
-                  <span className="font-mono font-semibold w-7 text-right">{[92,78,65][i]}%</span>
+                  <span className="font-mono font-semibold w-7 text-right">{[92, 78, 65][i]}%</span>
                 </div>
               ))}
             </div>
@@ -193,13 +192,12 @@ function AdminDashboard() {
                 <span className="font-medium text-primary">{a.target}</span>
                 <div className="text-[10px] text-muted-foreground font-mono mt-0.5">{a.time}</div>
               </div>
-              <span className={`text-[10px] uppercase tracking-wider font-bold px-1.5 py-0.5 rounded border ${
-                a.type === "status" ? "border-success/30 bg-success/10 text-success"
-                : a.type === "file" ? "border-accent-cyan/30 bg-accent-cyan/15 text-accent-cyan"
-                : a.type === "comment" ? "border-primary/30 bg-primary/10 text-primary"
-                : a.type === "create" ? "border-accent-purple/30 bg-accent-purple/10 text-accent-purple"
-                : "border-border bg-muted text-muted-foreground"
-              }`}>
+              <span className={`text-[10px] uppercase tracking-wider font-bold px-1.5 py-0.5 rounded border ${a.type === "status" ? "border-success/30 bg-success/10 text-success"
+                  : a.type === "file" ? "border-accent-cyan/30 bg-accent-cyan/15 text-accent-cyan"
+                    : a.type === "comment" ? "border-primary/30 bg-primary/10 text-primary"
+                      : a.type === "create" ? "border-accent-purple/30 bg-accent-purple/10 text-accent-purple"
+                        : "border-border bg-muted text-muted-foreground"
+                }`}>
                 {a.type}
               </span>
             </div>

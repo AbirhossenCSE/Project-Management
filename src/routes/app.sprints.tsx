@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { sprints, findProject } from "@/data/mock";
-import { ProgressBar } from "@/components/mpms/Progress";
+import { ProgressBar } from "@/components/shared/Progress";
 import { Zap } from "lucide-react";
 
 export const Route = createFileRoute("/app/sprints")({

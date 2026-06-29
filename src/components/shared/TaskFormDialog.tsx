@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { members, projects, type Priority, type Task, type TaskStatus } from "@/data/mock";
-import { createTask, deleteTask, updateTask } from "@/data/taskStore";
+import { createTask, deleteTask, updateTask } from "@/store/taskStore";
 import { cn } from "@/lib/utils";
 
 const schema = z.object({

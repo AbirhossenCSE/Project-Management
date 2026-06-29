@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Plus, Zap } from "lucide-react";
 import { sprints, findProject } from "@/data/mock";
-import { ProgressBar } from "@/components/mpms/Progress";
-import { BurndownChart, VelocityBars } from "@/components/mpms/Charts";
+import { ProgressBar } from "@/components/shared/Progress";
+import { BurndownChart, VelocityBars } from "@/components/shared/Charts";
 import { burndownSeries } from "@/data/mock";
 
 export const Route = createFileRoute("/admin/sprints")({
@@ -60,11 +60,10 @@ function Sprints() {
                     <div className="text-[10px] text-muted-foreground uppercase font-semibold">Points</div>
                     <div className="font-mono font-semibold">{s.completedPoints}/{s.totalPoints}</div>
                   </div>
-                  <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded border ${
-                    s.status === "active" ? "bg-primary/10 text-primary border-primary/20"
-                    : s.status === "completed" ? "bg-success/10 text-success border-success/20"
-                    : "bg-muted text-muted-foreground border-border"
-                  }`}>{s.status}</span>
+                  <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded border ${s.status === "active" ? "bg-primary/10 text-primary border-primary/20"
+                      : s.status === "completed" ? "bg-success/10 text-success border-success/20"
+                        : "bg-muted text-muted-foreground border-border"
+                    }`}>{s.status}</span>
                 </div>
               </div>
               <div className="mt-4">

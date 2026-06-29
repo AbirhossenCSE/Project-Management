@@ -2,11 +2,11 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Filter, LayoutGrid, List, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { findMember, findProject, type Task, type TaskStatus } from "@/data/mock";
-import { useTasks } from "@/data/taskStore";
-import { KanbanBoard } from "@/components/mpms/Kanban";
-import { PriorityBadge, TaskStatusBadge, Tag } from "@/components/mpms/Badges";
-import { MemberAvatar } from "@/components/mpms/Avatar";
-import { DeleteTaskDialog, TaskFormDialog } from "@/components/mpms/TaskFormDialog";
+import { useTasks } from "@/store/taskStore";
+import { KanbanBoard } from "@/components/shared/Kanban";
+import { PriorityBadge, TaskStatusBadge, Tag } from "@/components/shared/Badges";
+import { MemberAvatar } from "@/components/shared/Avatar";
+import { DeleteTaskDialog, TaskFormDialog } from "@/components/shared/TaskFormDialog";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/admin/tasks")({
@@ -53,7 +53,7 @@ function Tasks() {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
           <input placeholder="Search tasks, IDs, assignees..." className="w-full bg-transparent pl-9 pr-3 py-1.5 text-xs outline-none" />
         </div>
-        {["Status","Priority","Assignee","Project"].map((f) => (
+        {["Status", "Priority", "Assignee", "Project"].map((f) => (
           <button key={f} className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground px-2 py-1.5 rounded hover:bg-muted">
             <Filter className="size-3.5" /> {f}
           </button>

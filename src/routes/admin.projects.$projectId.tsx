@@ -2,12 +2,12 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { ArrowLeft, Calendar, DollarSign, Users, Activity as ActivityIcon, FolderOpen, Zap } from "lucide-react";
 import { useState } from "react";
 import { findMember, findProject, sprints, tasks as allTasks, activities } from "@/data/mock";
-import { StatusBadge } from "@/components/mpms/Badges";
-import { ProgressBar, ProgressRing } from "@/components/mpms/Progress";
-import { AvatarGroup, MemberAvatar } from "@/components/mpms/Avatar";
-import { BurndownChart } from "@/components/mpms/Charts";
+import { StatusBadge } from "@/components/shared/Badges";
+import { ProgressBar, ProgressRing } from "@/components/shared/Progress";
+import { AvatarGroup, MemberAvatar } from "@/components/shared/Avatar";
+import { BurndownChart } from "@/components/shared/Charts";
 import { burndownSeries } from "@/data/mock";
-import { KanbanBoard } from "@/components/mpms/Kanban";
+import { KanbanBoard } from "@/components/shared/Kanban";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/admin/projects/$projectId")({
@@ -47,7 +47,7 @@ function ProjectDetails() {
             <div className="mt-4 flex flex-wrap gap-6 text-xs">
               <div className="flex items-center gap-1.5 text-muted-foreground"><FolderOpen className="size-3.5" /> Client: <span className="text-foreground font-medium">{project.client}</span></div>
               <div className="flex items-center gap-1.5 text-muted-foreground"><Calendar className="size-3.5" /> Due: <span className="text-foreground font-medium">{project.dueDate}</span></div>
-              <div className="flex items-center gap-1.5 text-muted-foreground"><DollarSign className="size-3.5" /> Budget: <span className="text-foreground font-medium">${(project.budget/1000).toFixed(0)}k</span></div>
+              <div className="flex items-center gap-1.5 text-muted-foreground"><DollarSign className="size-3.5" /> Budget: <span className="text-foreground font-medium">${(project.budget / 1000).toFixed(0)}k</span></div>
               <div className="flex items-center gap-1.5 text-muted-foreground"><Users className="size-3.5" /> Team:</div>
               <AvatarGroup ids={project.team} size={22} />
             </div>
@@ -59,9 +59,9 @@ function ProjectDetails() {
       {/* Stats */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
-          { label: "Tasks Done", value: `${project.tasksDone}/${project.tasksTotal}`, sub: `${Math.round((project.tasksDone/project.tasksTotal)*100)}% complete` },
+          { label: "Tasks Done", value: `${project.tasksDone}/${project.tasksTotal}`, sub: `${Math.round((project.tasksDone / project.tasksTotal) * 100)}% complete` },
           { label: "Active Sprints", value: projectSprints.filter(s => s.status === "active").length.toString(), sub: `${projectSprints.length} total` },
-          { label: "Budget Burn", value: `${Math.round((project.spent/project.budget)*100)}%`, sub: `$${(project.spent/1000).toFixed(0)}k of $${(project.budget/1000).toFixed(0)}k` },
+          { label: "Budget Burn", value: `${Math.round((project.spent / project.budget) * 100)}%`, sub: `$${(project.spent / 1000).toFixed(0)}k of $${(project.budget / 1000).toFixed(0)}k` },
           { label: "Days Left", value: "47", sub: "until deadline" },
         ].map((s) => (
           <div key={s.label} className="bg-card border border-border rounded-xl p-4 shadow-soft">
@@ -102,7 +102,7 @@ function ProjectDetails() {
             <div className="space-y-3">
               {[
                 { label: "Schedule", value: 82, tone: "primary" as const },
-                { label: "Budget", value: Math.round((project.spent/project.budget)*100), tone: "warning" as const },
+                { label: "Budget", value: Math.round((project.spent / project.budget) * 100), tone: "warning" as const },
                 { label: "Scope", value: 91, tone: "success" as const },
                 { label: "Quality", value: 88, tone: "cool" as const },
               ].map((m) => (
@@ -129,11 +129,10 @@ function ProjectDetails() {
                 <div className="text-[11px] text-muted-foreground">{s.start} → {s.end} · {s.completedPoints}/{s.totalPoints} pts</div>
               </div>
               <div className="w-40"><ProgressBar value={s.progress} tone={s.status === "completed" ? "success" : "primary"} /></div>
-              <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded border ${
-                s.status === "active" ? "bg-primary/10 text-primary border-primary/20"
-                : s.status === "completed" ? "bg-success/10 text-success border-success/20"
-                : "bg-muted text-muted-foreground border-border"
-              }`}>{s.status}</span>
+              <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded border ${s.status === "active" ? "bg-primary/10 text-primary border-primary/20"
+                  : s.status === "completed" ? "bg-success/10 text-success border-success/20"
+                    : "bg-muted text-muted-foreground border-border"
+                }`}>{s.status}</span>
             </div>
           ))}
         </div>
@@ -162,7 +161,7 @@ function ProjectDetails() {
 
       {tab === "Files" && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          {["Spec v2.pdf","Wireframes.fig","Schema.sql","Roadmap.xlsx","Brief.docx","Mockups.zip"].map((f, i) => (
+          {["Spec v2.pdf", "Wireframes.fig", "Schema.sql", "Roadmap.xlsx", "Brief.docx", "Mockups.zip"].map((f, i) => (
             <div key={f} className="bg-card border border-border rounded-xl p-4 shadow-soft hover:shadow-elevated hover:-translate-y-0.5 transition-all cursor-pointer">
               <div className="aspect-[4/3] rounded-md bg-muted/60 mb-3 grid place-items-center">
                 <div className="text-[10px] font-bold uppercase text-muted-foreground">{f.split(".").pop()}</div>

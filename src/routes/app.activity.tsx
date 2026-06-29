@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { activities } from "@/data/mock";
-import { MemberAvatar } from "@/components/mpms/Avatar";
+import { MemberAvatar } from "@/components/shared/Avatar";
 
 export const Route = createFileRoute("/app/activity")({
   component: () => (

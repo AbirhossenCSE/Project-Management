@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { AuthButton, AuthInput, AuthLayout } from "@/components/mpms/AuthLayout";
+import { AuthButton, AuthInput, AuthLayout } from "@/components/layout/AuthLayout";
 
 export const Route = createFileRoute("/reset-password")({
   head: () => ({ meta: [{ title: "New password — Nexus.io" }] }),

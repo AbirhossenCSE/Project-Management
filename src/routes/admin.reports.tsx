@@ -1,9 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Download } from "lucide-react";
-import { ProductivityArea, StatusPie, VelocityBars, WorkloadHeatmap } from "@/components/mpms/Charts";
+import { ProductivityArea, StatusPie, VelocityBars, WorkloadHeatmap } from "@/components/shared/Charts";
 import { productivitySeries, members, sprints } from "@/data/mock";
-import { ProgressBar } from "@/components/mpms/Progress";
-import { MemberAvatar } from "@/components/mpms/Avatar";
+import { ProgressBar } from "@/components/shared/Progress";
+import { MemberAvatar } from "@/components/shared/Avatar";
 
 export const Route = createFileRoute("/admin/reports")({
   head: () => ({ meta: [{ title: "Reports — Admin" }] }),
