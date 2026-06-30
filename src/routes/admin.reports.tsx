@@ -93,7 +93,7 @@ function Reports() {
           {[...members].sort((a, b) => b.productivity - a.productivity).slice(0, 6).map((m, i) => (
             <div key={m.id} className="flex items-center gap-3">
               <div className="size-6 rounded-full bg-muted grid place-items-center text-[10px] font-bold font-mono">{i + 1}</div>
-              <MemberAvatar id={m.id} size={28} />
+              <MemberAvatar member={m} size={28} />
               <div className="flex-1 min-w-0">
                 <div className="text-sm font-medium truncate">{m.name}</div>
                 <div className="text-[10px] text-muted-foreground">{m.role} · {m.department}</div>

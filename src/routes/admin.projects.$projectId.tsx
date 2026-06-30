@@ -49,7 +49,7 @@ function ProjectDetails() {
               <div className="flex items-center gap-1.5 text-muted-foreground"><Calendar className="size-3.5" /> Due: <span className="text-foreground font-medium">{project.dueDate}</span></div>
               <div className="flex items-center gap-1.5 text-muted-foreground"><DollarSign className="size-3.5" /> Budget: <span className="text-foreground font-medium">${(project.budget / 1000).toFixed(0)}k</span></div>
               <div className="flex items-center gap-1.5 text-muted-foreground"><Users className="size-3.5" /> Team:</div>
-              <AvatarGroup ids={project.team} size={22} />
+              <AvatarGroup members={project.team.map((id) => findMember(id))} size={22} />
             </div>
           </div>
           <ProgressRing value={project.progress} size={88} />
@@ -130,8 +130,8 @@ function ProjectDetails() {
               </div>
               <div className="w-40"><ProgressBar value={s.progress} tone={s.status === "completed" ? "success" : "primary"} /></div>
               <span className={`text-[10px] uppercase font-bold px-2 py-0.5 rounded border ${s.status === "active" ? "bg-primary/10 text-primary border-primary/20"
-                  : s.status === "completed" ? "bg-success/10 text-success border-success/20"
-                    : "bg-muted text-muted-foreground border-border"
+                : s.status === "completed" ? "bg-success/10 text-success border-success/20"
+                  : "bg-muted text-muted-foreground border-border"
                 }`}>{s.status}</span>
             </div>
           ))}
@@ -146,7 +146,7 @@ function ProjectDetails() {
             const m = findMember(id);
             return (
               <div key={id} className="bg-card border border-border rounded-2xl p-5 shadow-soft text-center">
-                <MemberAvatar id={id} size={56} className="mx-auto mb-3" />
+                <MemberAvatar member={findMember(id)} size={56} className="mx-auto mb-3" />
                 <div className="font-semibold text-sm">{m.name}</div>
                 <div className="text-[11px] text-muted-foreground">{m.role} · {m.department}</div>
                 <div className="mt-3 grid grid-cols-2 gap-2 text-[11px]">

@@ -80,7 +80,12 @@ export function TaskCard({
           {task.comments > 0 && <span className="inline-flex items-center gap-1"><MessageSquare className="size-3" />{task.comments}</span>}
           {task.attachments > 0 && <span className="inline-flex items-center gap-1"><Paperclip className="size-3" />{task.attachments}</span>}
         </div>
-        <MemberAvatar id={task.assignee} size={22} />
+        <MemberAvatar
+          member={typeof task.assignee === "object" && task.assignee
+            ? task.assignee
+            : { id: task.assignee, name: task.assignee }}
+          size={22}
+        />
       </div>
     </div>
   );

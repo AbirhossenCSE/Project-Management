@@ -44,7 +44,9 @@ export function AppShell({
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const profileId = role === "admin" ? "m1" : "m2";
+  const profileMember = role === "admin"
+    ? { id: "m1", name: "Sarah Jenkins" }
+    : { id: "m2", name: "Marcus Yao" };
   const profileLabel = role === "admin" ? "Admin · Workspace owner" : "Member · Engineering";
 
   function handleLogout() {
@@ -130,7 +132,7 @@ export function AppShell({
             <span>→</span>
           </Link>
           <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted cursor-pointer transition-colors">
-            <MemberAvatar id={profileId} size={32} />
+            <MemberAvatar member={profileMember} size={32} />
             <div className="flex-1 min-w-0">
               <div className="text-xs font-semibold truncate">{role === "admin" ? "Sarah Jenkins" : "Marcus Yao"}</div>
               <div className="text-[10px] text-muted-foreground truncate">{profileLabel}</div>

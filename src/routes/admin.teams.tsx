@@ -27,7 +27,7 @@ function Teams() {
         {members.map((m) => (
           <div key={m.id} className="bg-card border border-border rounded-2xl p-5 shadow-soft hover:shadow-elevated hover:-translate-y-0.5 transition-all">
             <div className="flex items-start gap-3">
-              <MemberAvatar id={m.id} size={48} />
+              <MemberAvatar member={m} size={48} />
               <div className="flex-1 min-w-0">
                 <div className="font-semibold text-sm truncate">{m.name}</div>
                 <div className="text-[11px] text-muted-foreground truncate flex items-center gap-1"><Mail className="size-3" />{m.email}</div>

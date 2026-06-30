@@ -1,11 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { LayoutGrid, List, Plus, Search, Filter, DollarSign, Calendar } from "lucide-react";
+import { LayoutGrid, List, Plus, Search, Filter, Calendar, Loader2 } from "lucide-react";
 import { useState } from "react";
-import { projects } from "@/data/mock";
 import { ProgressBar } from "@/components/shared/Progress";
 import { StatusBadge } from "@/components/shared/Badges";
 import { AvatarGroup } from "@/components/shared/Avatar";
 import { cn } from "@/lib/utils";
+import { useProjects } from "@/hooks";
 
 export const Route = createFileRoute("/admin/projects")({
   head: () => ({ meta: [{ title: "Projects — Admin" }] }),
@@ -14,13 +14,34 @@ export const Route = createFileRoute("/admin/projects")({
 
 function Projects() {
   const [view, setView] = useState<"grid" | "table">("grid");
+  const { projects, loading, error } = useProjects();
+
+  if (loading) {
+    return (
+      <div className="p-6 sm:p-8 max-w-[1600px] mx-auto flex min-h-[50vh] items-center justify-center">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Loader2 className="size-4 animate-spin" /> Loading projects...
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6 sm:p-8 max-w-[1600px] mx-auto">
+        <div className="rounded-2xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
+          {error}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 sm:p-8 space-y-6 max-w-[1600px] mx-auto">
       <div className="flex items-end justify-between flex-wrap gap-4">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Projects</h1>
-          <p className="text-sm text-muted-foreground mt-1">{projects.length} projects · 6 clients · $1.05M committed</p>
+          <p className="text-sm text-muted-foreground mt-1">{projects.length} projects · live data from the API</p>
         </div>
         <button className="gradient-primary text-white px-3 py-2 rounded-md text-xs font-semibold shadow-glow inline-flex items-center gap-2">
           <Plus className="size-3.5" /> Create Project
@@ -52,13 +73,13 @@ function Projects() {
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
           {projects.map((p) => (
             <Link
-              key={p.id}
+              key={p._id}
               to="/admin/projects/$projectId"
-              params={{ projectId: p.id }}
+              params={{ projectId: p._id }}
               className="group bg-card border border-border rounded-2xl p-5 shadow-soft hover:shadow-elevated hover:-translate-y-1 transition-all"
             >
               <div className="flex items-start justify-between mb-4">
-                <div className="size-10 rounded-xl grid place-items-center text-white text-xs font-bold" style={{ background: p.color }}>
+                <div className="size-10 rounded-xl grid place-items-center text-white text-xs font-bold bg-primary">
                   {p.name.split(" ").slice(0, 2).map((w) => w[0]).join("")}
                 </div>
                 <StatusBadge status={p.status} />
@@ -66,14 +87,13 @@ function Projects() {
               <h3 className="font-semibold leading-snug mb-1 group-hover:text-primary transition-colors">{p.name}</h3>
               <p className="text-xs text-muted-foreground line-clamp-2 mb-4">{p.description}</p>
               <div className="flex justify-between text-[10px] text-muted-foreground mb-1">
-                <span>Progress</span><span className="font-mono font-semibold text-foreground">{p.progress}%</span>
+                <span>Members</span><span className="font-mono font-semibold text-foreground">{p.members.length + 1}</span>
               </div>
-              <ProgressBar value={p.progress} tone={p.status === "delayed" ? "destructive" : p.status === "completed" ? "success" : "primary"} className="mb-4" />
+              <ProgressBar value={p.status === "completed" ? 100 : p.status === "active" ? 66 : 33} tone={p.status === "on-hold" ? "warning" : p.status === "completed" ? "success" : "primary"} className="mb-4" />
               <div className="flex items-center justify-between">
-                <AvatarGroup ids={p.team} size={22} />
+                <AvatarGroup members={[p.owner, ...p.members]} size={22} />
                 <div className="flex items-center gap-3 text-[10px] text-muted-foreground">
-                  <span className="inline-flex items-center gap-1"><Calendar className="size-3" />{p.dueDate.split(",")[0]}</span>
-                  <span className="inline-flex items-center gap-1"><DollarSign className="size-3" />{(p.budget / 1000).toFixed(0)}k</span>
+                  <span className="inline-flex items-center gap-1"><Calendar className="size-3" />{new Date(p.createdAt).toLocaleDateString()}</span>
                 </div>
               </div>
             </Link>
@@ -95,21 +115,21 @@ function Projects() {
             </thead>
             <tbody className="divide-y divide-border">
               {projects.map((p) => (
-                <tr key={p.id} className="hover:bg-muted/40 cursor-pointer transition-colors">
+                <tr key={p._id} className="hover:bg-muted/40 cursor-pointer transition-colors">
                   <td className="px-5 py-3.5">
-                    <Link to="/admin/projects/$projectId" params={{ projectId: p.id }} className="flex items-center gap-3">
-                      <div className="size-8 rounded-lg grid place-items-center text-white text-[10px] font-bold" style={{ background: p.color }}>
+                    <Link to="/admin/projects/$projectId" params={{ projectId: p._id }} className="flex items-center gap-3">
+                      <div className="size-8 rounded-lg grid place-items-center text-white text-[10px] font-bold bg-primary">
                         {p.name.split(" ").slice(0, 2).map((w) => w[0]).join("")}
                       </div>
                       <span className="font-medium">{p.name}</span>
                     </Link>
                   </td>
-                  <td className="px-5 py-3.5 text-muted-foreground text-xs">{p.client}</td>
-                  <td className="px-5 py-3.5"><div className="w-28"><ProgressBar value={p.progress} /></div></td>
-                  <td className="px-5 py-3.5"><AvatarGroup ids={p.team} size={22} /></td>
-                  <td className="px-5 py-3.5 font-mono text-xs">${(p.spent / 1000).toFixed(0)}k / ${(p.budget / 1000).toFixed(0)}k</td>
+                  <td className="px-5 py-3.5 text-muted-foreground text-xs">{p.owner.name}</td>
+                  <td className="px-5 py-3.5"><div className="w-28"><ProgressBar value={p.status === "completed" ? 100 : p.status === "active" ? 66 : 33} /></div></td>
+                  <td className="px-5 py-3.5"><AvatarGroup members={[p.owner, ...p.members]} size={22} /></td>
+                  <td className="px-5 py-3.5 font-mono text-xs">{p.members.length + 1} members</td>
                   <td className="px-5 py-3.5"><StatusBadge status={p.status} /></td>
-                  <td className="px-5 py-3.5 text-right font-mono text-xs text-muted-foreground">{p.dueDate}</td>
+                  <td className="px-5 py-3.5 text-right font-mono text-xs text-muted-foreground">{new Date(p.createdAt).toLocaleDateString()}</td>
                 </tr>
               ))}
             </tbody>

@@ -15,7 +15,7 @@ export const Route = createFileRoute("/app/activity")({
             <div key={i} className="relative">
               <div className="absolute -left-[26px] top-1 size-3 rounded-full gradient-primary ring-4 ring-card" />
               <div className="flex items-start gap-3">
-                <MemberAvatar id={`m${(i % 7) + 1}`} size={28} />
+                <MemberAvatar member={activities[i % activities.length] ? { id: `m${(i % 7) + 1}`, name: activities[i % activities.length].user } : undefined} size={28} />
                 <div className="flex-1 text-sm">
                   <span className="font-medium">{a.user}</span>
                   <span className="text-muted-foreground"> {a.action} </span>

@@ -71,7 +71,7 @@ function UserDashboard() {
           <div className="space-y-4">
             {activities.filter(a => a.type === "comment" || a.type === "assign").slice(0, 5).map((a, i) => (
               <div key={a.id} className="flex gap-3">
-                <MemberAvatar id={`m${(i % 7) + 1}`} size={26} />
+                <MemberAvatar member={members[i % members.length]} size={26} />
                 <div className="text-xs">
                   <span className="font-medium">{a.user}</span> <span className="text-muted-foreground">{a.action}</span> <span className="text-primary">{a.target}</span>
                   <div className="text-[10px] text-muted-foreground mt-0.5">{a.time}</div>

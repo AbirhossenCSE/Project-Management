@@ -103,7 +103,7 @@ function Tasks() {
                     </td>
                     <td className="px-4 py-3 text-xs">{p?.name}</td>
                     <td className="px-4 py-3">
-                      <div className="flex items-center gap-2"><MemberAvatar id={m.id} size={22} /><span className="text-xs">{m.name.split(" ")[0]}</span></div>
+                      <div className="flex items-center gap-2"><MemberAvatar member={m} size={22} /><span className="text-xs">{m.name.split(" ")[0]}</span></div>
                     </td>
                     <td className="px-4 py-3"><PriorityBadge priority={t.priority} /></td>
                     <td className="px-4 py-3"><TaskStatusBadge status={t.status} /></td>

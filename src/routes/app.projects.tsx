@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { projects, tasks } from "@/data/mock";
+import { findMember } from "@/data/mock";
 import { ProgressBar } from "@/components/shared/Progress";
 import { StatusBadge } from "@/components/shared/Badges";
 import { AvatarGroup } from "@/components/shared/Avatar";
@@ -26,7 +27,7 @@ export const Route = createFileRoute("/app/projects")({
               <p className="text-xs text-muted-foreground line-clamp-2 mb-4">{p.description}</p>
               <ProgressBar value={p.progress} className="mb-3" />
               <div className="flex items-center justify-between text-[11px] text-muted-foreground">
-                <AvatarGroup ids={p.team} size={22} />
+                <AvatarGroup members={p.team.map((id) => findMember(id))} size={22} />
                 <span className="font-mono">{p.progress}%</span>
               </div>
             </Link>
