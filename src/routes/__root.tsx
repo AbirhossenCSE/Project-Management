@@ -12,8 +12,10 @@ import {
 import { useEffect } from "react";
 
 import appCss from "../styles.css?url";
+import { AuthUserProvider } from "@/components/layout/auth-user-context";
 import { Toaster } from "@/components/ui/sonner";
-import { getMe, logout, tokenKey } from "@/services/auth.service";
+import { getMe, logout, tokenKey, type AuthUser } from "@/services/auth.service";
+import { useState } from "react";
 
 function NotFoundComponent() {
   return (
@@ -121,6 +123,7 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const navigate = useNavigate();
   const pathname = useRouterState({ select: (state) => state.location.pathname });
+  const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
 
   useEffect(() => {
     const token = typeof window !== "undefined" ? window.localStorage.getItem(tokenKey) : null;
@@ -135,6 +138,8 @@ function RootComponent() {
       .then((response) => {
         if (cancelled) return;
 
+        setCurrentUser(response.data.user);
+
         if (pathname.startsWith("/admin") && response.data.user.role === "member") {
           void navigate({ to: "/app" });
         }
@@ -144,6 +149,7 @@ function RootComponent() {
           return;
         }
 
+        setCurrentUser(null);
         logout();
         void navigate({ to: "/login" });
       });
@@ -155,7 +161,9 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Outlet />
+      <AuthUserProvider user={currentUser} setUser={setCurrentUser}>
+        <Outlet />
+      </AuthUserProvider>
       <Toaster richColors position="top-right" />
     </QueryClientProvider>
   );

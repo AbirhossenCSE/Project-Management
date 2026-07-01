@@ -6,6 +6,7 @@ import { ProgressBar, ProgressRing } from "@/components/shared/Progress";
 import { StatusBadge } from "@/components/shared/Badges";
 import { AvatarGroup, MemberAvatar } from "@/components/shared/Avatar";
 import { useProjects, useTasks } from "@/hooks";
+import { useAuthUser } from "@/components/layout/auth-user-context";
 
 export const Route = createFileRoute("/admin/")({
   head: () => ({ meta: [{ title: "Admin Dashboard — Nexus.io" }] }),
@@ -15,6 +16,7 @@ export const Route = createFileRoute("/admin/")({
 function AdminDashboard() {
   const { projects, loading: projectsLoading, error: projectsError } = useProjects();
   const { tasks, loading: tasksLoading, error: tasksError } = useTasks();
+  const { user } = useAuthUser();
 
   const loading = projectsLoading || tasksLoading;
   const error = projectsError ?? tasksError;
@@ -67,7 +69,7 @@ function AdminDashboard() {
       <div className="flex items-end justify-between flex-wrap gap-4">
         <div>
           <div className="text-xs text-muted-foreground mb-1">Monday, May 25</div>
-          <h1 className="text-2xl font-semibold tracking-tight">Good morning, Sarah.</h1>
+          <h1 className="text-2xl font-semibold tracking-tight">Good morning, {user?.name ?? "there"}.</h1>
           <p className="text-sm text-muted-foreground mt-1">Here's what's happening across your workspace today.</p>
         </div>
         <div className="flex gap-2">

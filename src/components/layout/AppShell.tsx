@@ -7,6 +7,7 @@ import { useState, type ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import { MemberAvatar } from "../shared/Avatar";
 import { logout } from "@/services/auth.service";
+import { useAuthUser } from "./auth-user-context";
 
 type NavItem = { to: string; label: string; icon: typeof LayoutDashboard; badge?: string };
 
@@ -44,10 +45,9 @@ export function AppShell({
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const profileMember = role === "admin"
-    ? { id: "m1", name: "Sarah Jenkins" }
-    : { id: "m2", name: "Marcus Yao" };
-  const profileLabel = role === "admin" ? "Admin · Workspace owner" : "Member · Engineering";
+  const { user } = useAuthUser();
+  const profileMember = user ? { id: user.id, name: user.name, avatar: user.avatar } : { id: role === "admin" ? "m1" : "m2", name: role === "admin" ? "Admin" : "Member" };
+  const profileLabel = user ? `${user.role === "admin" ? "Admin" : "Member"} · ${user.email}` : (role === "admin" ? "Admin · Workspace owner" : "Member · Engineering");
 
   function handleLogout() {
     logout();
@@ -134,7 +134,7 @@ export function AppShell({
           <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted cursor-pointer transition-colors">
             <MemberAvatar member={profileMember} size={32} />
             <div className="flex-1 min-w-0">
-              <div className="text-xs font-semibold truncate">{role === "admin" ? "Sarah Jenkins" : "Marcus Yao"}</div>
+              <div className="text-xs font-semibold truncate">{user?.name ?? (role === "admin" ? "Admin" : "Member")}</div>
               <div className="text-[10px] text-muted-foreground truncate">{profileLabel}</div>
             </div>
           </div>

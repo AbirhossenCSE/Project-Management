@@ -1,5 +1,5 @@
 import type { Response } from "express";
-import { isValidObjectId, Types } from "mongoose";
+import { isValidObjectId } from "mongoose";
 
 import type { AuthenticatedRequest } from "../middleware/auth";
 import Project from "../models/Project";
@@ -97,7 +97,7 @@ export async function getTasks(req: AuthenticatedRequest, res: Response): Promis
         } = {};
 
         if (currentUser.role === "member") {
-            query.assignee = new Types.ObjectId(jwtUserId);
+            query.assignee = jwtUserId;
         } else {
             const accessibleProjects = await Project.find({
                 $or: [{ owner: userId }, { members: userId }],
@@ -139,7 +139,7 @@ export async function getTasks(req: AuthenticatedRequest, res: Response): Promis
 
         if (status) query.status = status;
         if (currentUser.role === "admin" && assignee) query.assignee = assignee;
-        if (currentUser.role === "member") query.assignee = new Types.ObjectId(jwtUserId);
+        if (currentUser.role === "member") query.assignee = jwtUserId;
 
         const tasks = await Task.find(query)
             .sort({ createdAt: -1 })
