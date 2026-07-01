@@ -1,13 +1,16 @@
-Nexus.io — Project Management Suite
+# Nexus.io — Project Management Suite
+
 A full-stack project management application with role-based dashboards for Admins and Members.
-🔗 Live Demo
+
+## Live Demo
 ember-project-suite.vercel.app
+
 🛠️ Tech Stack
 Frontend: React, TypeScript, Vite, TanStack Router, Tailwind CSS, shadcn/ui
 Backend: Node.js, Express, MongoDB Atlas, JWT Authentication
 Deployment: Vercel (Client + Server)
-✨ Features
 
+✨ Features
 Role-based access control (Admin / Member)
 Admin dashboard with analytics and project health
 Project creation with member assignment
