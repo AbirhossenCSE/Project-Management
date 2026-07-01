@@ -25,7 +25,7 @@ export async function createProject(req: AuthenticatedRequest, res: Response): P
         }
 
         const validatedMembers = Array.isArray(members)
-            ? members.filter((id) => typeof id === "string" && isValidObjectId(id))
+            ? [...new Set(members.filter((id) => typeof id === "string" && isValidObjectId(id)))]
             : [];
 
         if (!validatedMembers.includes(userId)) {
@@ -151,7 +151,7 @@ export async function updateProject(req: AuthenticatedRequest, res: Response): P
         if (description !== undefined) project.description = description.trim();
         if (status !== undefined) project.status = status;
         if (members !== undefined) {
-            const validatedMembers = members.filter((memberId) => isValidObjectId(memberId));
+            const validatedMembers = [...new Set(members.filter((memberId) => isValidObjectId(memberId)))];
             if (!validatedMembers.includes(userId)) {
                 validatedMembers.push(userId);
             }

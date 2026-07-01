@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
-import { useProjects } from "@/hooks";
+import { useProjects, useUsers } from "@/hooks";
 import { createTask, deleteTask, updateTask, type TaskPayload, type TaskStatus } from "@/services/task.service";
 import { cn } from "@/lib/utils";
 import type { TaskItem } from "@/hooks/useTasks";
@@ -69,12 +69,14 @@ export interface TaskFormDialogProps {
   onOpenChange: (open: boolean) => void;
   task?: TaskItem | null;
   defaults?: Partial<FormValues>;
+  projectId?: string;
   refetch?: () => Promise<void> | void;
 }
 
-export function TaskFormDialog({ open, onOpenChange, task, defaults, refetch }: TaskFormDialogProps) {
+export function TaskFormDialog({ open, onOpenChange, task, defaults, projectId, refetch }: TaskFormDialogProps) {
   const isEdit = !!task;
   const { projects } = useProjects();
+  const { users } = useUsers();
   const [values, setValues] = useState<FormValues>({
     title: "",
     description: "",
@@ -98,9 +100,9 @@ export function TaskFormDialog({ open, onOpenChange, task, defaults, refetch }: 
 
   const assigneeOptions = useMemo(() => {
     if (!selectedProject) return [];
-    const members = [selectedProject.owner, ...selectedProject.members];
-    return members.filter((member, index, array) => array.findIndex((candidate) => candidate._id === member._id) === index);
-  }, [selectedProject]);
+    const allowedIds = new Set([selectedProject.owner._id, ...selectedProject.members.map((member) => member._id)]);
+    return users.filter((user) => allowedIds.has(user._id));
+  }, [selectedProject, users]);
 
   useEffect(() => {
     if (!open) return;
@@ -117,13 +119,14 @@ export function TaskFormDialog({ open, onOpenChange, task, defaults, refetch }: 
         tags: "",
       });
     } else {
-      const initialProjectId = defaults?.projectId ?? projects[0]?._id ?? "";
+      const initialProjectId = defaults?.projectId ?? projectId ?? projects[0]?._id ?? "";
       const initialProject = projects.find((project) => project._id === initialProjectId) ?? projects[0];
+      const initialAssignee = defaults?.assigneeId ?? initialProject?.owner._id ?? users[0]?._id ?? "";
       setValues({
         title: "",
         description: "",
         projectId: initialProjectId,
-        assigneeId: defaults?.assigneeId ?? initialProject?.owner._id ?? "",
+        assigneeId: initialAssignee,
         status: defaults?.status ?? "todo",
         priority: defaults?.priority ?? "medium",
         dueDate: new Date().toISOString().slice(0, 10),
@@ -133,7 +136,7 @@ export function TaskFormDialog({ open, onOpenChange, task, defaults, refetch }: 
     }
     setErrors({});
     setSubmitError(null);
-  }, [open, task, defaults, projects]);
+  }, [open, task, defaults, projects, users, projectId]);
 
   useEffect(() => {
     if (!open || task) return;
@@ -154,15 +157,15 @@ export function TaskFormDialog({ open, onOpenChange, task, defaults, refetch }: 
   }, [open, task, projects]);
 
   useEffect(() => {
-    if (!selectedProject || !values.assigneeId) return;
-    const validAssigneeIds = new Set(assigneeOptions.map((member) => member._id));
+    if (!values.assigneeId) return;
+    const validAssigneeIds = new Set(assigneeOptions.map((user) => user._id));
     if (!validAssigneeIds.has(values.assigneeId)) {
       setValues((current) => ({
         ...current,
-        assigneeId: selectedProject.owner._id,
+        assigneeId: assigneeOptions[0]?._id ?? "",
       }));
     }
-  }, [selectedProject, assigneeOptions, values.assigneeId]);
+  }, [assigneeOptions, values.assigneeId]);
 
   function update<K extends keyof FormValues>(key: K, val: FormValues[K]) {
     setValues((v) => ({ ...v, [key]: val }));
@@ -271,11 +274,11 @@ export function TaskFormDialog({ open, onOpenChange, task, defaults, refetch }: 
                 <Select value={values.assigneeId} onValueChange={(v) => update("assigneeId", v)}>
                   <SelectTrigger><SelectValue placeholder="Assign to" /></SelectTrigger>
                   <SelectContent>
-                    {assigneeOptions.map((member) => (
-                      <SelectItem key={member._id} value={member._id}>
+                    {assigneeOptions.map((user) => (
+                      <SelectItem key={user._id} value={user._id}>
                         <span className="inline-flex items-center gap-2">
-                          <span className="size-5 rounded-full inline-flex items-center justify-center text-[9px] font-semibold text-white" style={{ background: "var(--primary)" }}>{member.name.slice(0, 2).toUpperCase()}</span>
-                          {member.name}
+                          <span className="size-5 rounded-full inline-flex items-center justify-center text-[9px] font-semibold text-white" style={{ background: "var(--primary)" }}>{user.name.slice(0, 2).toUpperCase()}</span>
+                          {user.name}
                         </span>
                       </SelectItem>
                     ))}

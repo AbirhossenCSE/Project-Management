@@ -1,9 +1,10 @@
 import type { Response } from "express";
-import { isValidObjectId } from "mongoose";
+import { isValidObjectId, Types } from "mongoose";
 
 import type { AuthenticatedRequest } from "../middleware/auth";
 import Project from "../models/Project";
 import Task from "../models/Task";
+import User from "../models/User";
 
 async function canAccessProject(projectId: string, userId: string): Promise<boolean> {
     const project = await Project.findOne({
@@ -66,9 +67,20 @@ export async function createTask(req: AuthenticatedRequest, res: Response): Prom
 
 export async function getTasks(req: AuthenticatedRequest, res: Response): Promise<void> {
     try {
+        console.log(req.user);
+
         const userId = req.userId;
         if (!userId) {
             res.status(401).json({ success: false, message: "Unauthorized" });
+            return;
+        }
+
+        const jwtUser = req.user && typeof req.user === "object" ? req.user : null;
+        const jwtUserId = jwtUser && typeof jwtUser.id === "string" ? jwtUser.id : userId;
+
+        const currentUser = await User.findById(userId).select("role");
+        if (!currentUser) {
+            res.status(404).json({ success: false, message: "User not found" });
             return;
         }
 
@@ -78,38 +90,56 @@ export async function getTasks(req: AuthenticatedRequest, res: Response): Promis
             assignee?: string;
         };
 
-        const accessibleProjects = await Project.find({
-            $or: [{ owner: userId }, { members: userId }],
-        }).select("_id");
-
-        const accessibleProjectIds = accessibleProjects.map((p) => p._id);
-        if (accessibleProjectIds.length === 0) {
-            res.status(200).json({ success: true, data: { tasks: [] } });
-            return;
-        }
-
         const query: {
-            project: { $in: unknown[] } | string;
+            project?: { $in: unknown[] } | string;
             status?: string;
             assignee?: string;
-        } = {
-            project: { $in: accessibleProjectIds },
-        };
+        } = {};
+
+        if (currentUser.role === "member") {
+            query.assignee = new Types.ObjectId(jwtUserId);
+        } else {
+            const accessibleProjects = await Project.find({
+                $or: [{ owner: userId }, { members: userId }],
+            }).select("_id");
+
+            const accessibleProjectIds = accessibleProjects.map((p) => p._id);
+            if (accessibleProjectIds.length === 0) {
+                res.status(200).json({ success: true, data: { tasks: [] } });
+                return;
+            }
+
+            query.project = { $in: accessibleProjectIds };
+        }
 
         if (project) {
             if (!isValidObjectId(project)) {
                 res.status(400).json({ success: false, message: "Invalid project id" });
                 return;
             }
-            if (!accessibleProjectIds.some((id) => id.toString() === project)) {
-                res.status(403).json({ success: false, message: "Forbidden" });
-                return;
+            if (currentUser.role === "admin") {
+                const accessibleProjects = await Project.find({
+                    $or: [{ owner: userId }, { members: userId }],
+                }).select("_id");
+
+                const accessibleProjectIds = accessibleProjects.map((id) => id._id.toString());
+                if (!accessibleProjectIds.includes(project)) {
+                    res.status(403).json({ success: false, message: "Forbidden" });
+                    return;
+                }
+            } else {
+                const allowed = await Project.findOne({ _id: project, $or: [{ owner: userId }, { members: userId }] }).select("_id");
+                if (!allowed) {
+                    res.status(403).json({ success: false, message: "Forbidden" });
+                    return;
+                }
             }
             query.project = project;
         }
 
         if (status) query.status = status;
-        if (assignee) query.assignee = assignee;
+        if (currentUser.role === "admin" && assignee) query.assignee = assignee;
+        if (currentUser.role === "member") query.assignee = new Types.ObjectId(jwtUserId);
 
         const tasks = await Task.find(query)
             .sort({ createdAt: -1 })

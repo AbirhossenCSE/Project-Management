@@ -13,13 +13,16 @@ export type SprintItem = {
     createdAt: string;
 };
 
-export function useSprints(projectId: string) {
+export function useSprints(projectId: string | string[]) {
     const [sprints, setSprints] = useState<SprintItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
     const refetch = useCallback(async () => {
-        if (!projectId) {
+        const projectIds = Array.isArray(projectId) ? projectId : [projectId];
+        const filteredProjectIds = projectIds.filter(Boolean);
+
+        if (filteredProjectIds.length === 0) {
             setSprints([]);
             setLoading(false);
             return;
@@ -29,8 +32,9 @@ export function useSprints(projectId: string) {
         setError(null);
 
         try {
-            const response = await getSprints(projectId);
-            setSprints(response.data.sprints ?? []);
+            const responses = await Promise.all(filteredProjectIds.map((id) => getSprints(id)));
+            const nextSprints = responses.flatMap((response) => response.data.sprints ?? []);
+            setSprints(nextSprints);
         } catch (err) {
             const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? "Failed to load sprints";
             setError(message);

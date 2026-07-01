@@ -183,6 +183,7 @@ function Tasks() {
         onOpenChange={setFormOpen}
         task={editing}
         defaults={defaults}
+        projectId={editing ? (typeof editing.project === "object" ? editing.project._id : editing.project) : undefined}
         refetch={refetch}
       />
     </div>

@@ -103,7 +103,14 @@ function MyTasks() {
         }}
         onDelete={(t) => setDeleting(t)}
       />
-      <TaskFormDialog open={formOpen} onOpenChange={setFormOpen} task={editing} defaults={defaults} refetch={refetch} />
+      <TaskFormDialog
+        open={formOpen}
+        onOpenChange={setFormOpen}
+        task={editing}
+        defaults={defaults}
+        projectId={editing ? (typeof editing.project === "object" ? editing.project._id : editing.project) : undefined}
+        refetch={refetch}
+      />
       <DeleteTaskDialog task={deleting} open={!!deleting} onOpenChange={(o) => !o && setDeleting(null)} refetch={refetch} />
     </div>
   );

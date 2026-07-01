@@ -7,6 +7,7 @@ import {
   HeadContent,
   Scripts,
   useNavigate,
+  useRouterState,
 } from "@tanstack/react-router";
 import { useEffect } from "react";
 
@@ -119,6 +120,7 @@ function RootShell({ children }: { children: React.ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const navigate = useNavigate();
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
 
   useEffect(() => {
     const token = typeof window !== "undefined" ? window.localStorage.getItem(tokenKey) : null;
@@ -129,19 +131,27 @@ function RootComponent() {
 
     let cancelled = false;
 
-    void getMe().catch(() => {
-      if (cancelled) {
-        return;
-      }
+    void getMe()
+      .then((response) => {
+        if (cancelled) return;
 
-      logout();
-      void navigate({ to: "/login" });
-    });
+        if (pathname.startsWith("/admin") && response.data.user.role === "member") {
+          void navigate({ to: "/app" });
+        }
+      })
+      .catch(() => {
+        if (cancelled) {
+          return;
+        }
+
+        logout();
+        void navigate({ to: "/login" });
+      });
 
     return () => {
       cancelled = true;
     };
-  }, [navigate]);
+  }, [navigate, pathname]);
 
   return (
     <QueryClientProvider client={queryClient}>
