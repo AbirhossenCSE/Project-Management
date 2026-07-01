@@ -4,18 +4,13 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
-  HeadContent,
-  Scripts,
   useNavigate,
   useRouterState,
 } from "@tanstack/react-router";
-import { useEffect } from "react";
-
-import appCss from "../styles.css?url";
+import { useEffect, useState } from "react";
 import { AuthUserProvider } from "@/components/layout/auth-user-context";
 import { Toaster } from "@/components/ui/sonner";
 import { getMe, logout, tokenKey, type AuthUser } from "@/services/auth.service";
-import { useState } from "react";
 
 function NotFoundComponent() {
   return (
@@ -75,49 +70,10 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
-  head: () => ({
-    meta: [
-      { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "A modern, premium UI/UX design for a minimal project management system." },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "A modern, premium UI/UX design for a minimal project management system." },
-      { property: "og:type", content: "website" },
-      { name: "twitter:card", content: "summary" },
-      { name: "twitter:site", content: "@Lovable" },
-      { name: "twitter:title", content: "Lovable App" },
-      { name: "twitter:description", content: "A modern, premium UI/UX design for a minimal project management system." },
-      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/74b00033-db69-4ce1-9248-31fecc3992c7/id-preview-f95b0cae--2abeabe0-2a72-45ce-8ee1-882092f41574.lovable.app-1779699669499.png" },
-      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/74b00033-db69-4ce1-9248-31fecc3992c7/id-preview-f95b0cae--2abeabe0-2a72-45ce-8ee1-882092f41574.lovable.app-1779699669499.png" },
-    ],
-    links: [
-      {
-        rel: "stylesheet",
-        href: appCss,
-      },
-    ],
-  }),
-  shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
   errorComponent: ErrorComponent,
 });
-
-function RootShell({ children }: { children: React.ReactNode }) {
-  return (
-    <html lang="en">
-      <head>
-        <HeadContent />
-      </head>
-      <body>
-        {children}
-        <Scripts />
-      </body>
-    </html>
-  );
-}
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();

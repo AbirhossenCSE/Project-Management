@@ -31,9 +31,12 @@ app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
 async function startServer(): Promise<void> {
     try {
         await connectDB();
-        app.listen(port, () => {
-            console.log(`Server running on port ${port}`);
-        });
+
+        if (process.env.NODE_ENV !== "production") {
+            app.listen(port, () => {
+                console.log(`Server running on port ${port}`);
+            });
+        }
     } catch (error) {
         console.error("Failed to start server", error);
         process.exit(1);
@@ -41,3 +44,5 @@ async function startServer(): Promise<void> {
 }
 
 void startServer();
+
+export default app;
