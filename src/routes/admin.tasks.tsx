@@ -1,13 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Filter, LayoutGrid, List, Pencil, Plus, Search, Trash2 } from "lucide-react";
+import { Filter, LayoutGrid, List, Loader2, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { useState } from "react";
-import { findMember, findProject, type Task, type TaskStatus } from "@/data/mock";
-import { useTasks } from "@/store/taskStore";
+import { type TaskStatus } from "@/data/mock";
 import { KanbanBoard } from "@/components/shared/Kanban";
 import { PriorityBadge, TaskStatusBadge, Tag } from "@/components/shared/Badges";
 import { MemberAvatar } from "@/components/shared/Avatar";
-import { DeleteTaskDialog, TaskFormDialog } from "@/components/shared/TaskFormDialog";
+import { TaskFormDialog } from "@/components/shared/TaskFormDialog";
 import { cn } from "@/lib/utils";
+import { useTasks } from "@/hooks";
+import type { TaskItem } from "@/hooks/useTasks";
+import { deleteTask } from "@/services/task.service";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/tasks")({
   head: () => ({ meta: [{ title: "Tasks — Admin" }] }),
@@ -16,21 +19,59 @@ export const Route = createFileRoute("/admin/tasks")({
 
 function Tasks() {
   const [view, setView] = useState<"board" | "table">("board");
-  const tasks = useTasks();
+  const { tasks, loading, error, refetch } = useTasks();
   const [formOpen, setFormOpen] = useState(false);
-  const [editing, setEditing] = useState<Task | null>(null);
+  const [editing, setEditing] = useState<TaskItem | null>(null);
   const [defaults, setDefaults] = useState<{ status?: TaskStatus } | undefined>();
-  const [deleting, setDeleting] = useState<Task | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   function openCreate(status?: TaskStatus) {
     setEditing(null);
     setDefaults(status ? { status } : undefined);
     setFormOpen(true);
   }
-  function openEdit(task: Task) {
+  function openEdit(task: TaskItem) {
     setEditing(task);
     setDefaults(undefined);
     setFormOpen(true);
+  }
+
+  async function handleDelete(task: TaskItem) {
+    if (!window.confirm(`Delete task ${task._id.slice(-6).toUpperCase()}? This cannot be undone.`)) {
+      return;
+    }
+
+    setDeletingId(task._id);
+    try {
+      await deleteTask(task._id);
+      await refetch();
+      toast.success("Task deleted");
+    } catch (err) {
+      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? "Failed to delete task";
+      toast.error(message);
+    } finally {
+      setDeletingId(null);
+    }
+  }
+
+  if (loading) {
+    return (
+      <div className="p-6 sm:p-8 max-w-[1600px] mx-auto flex min-h-[50vh] items-center justify-center">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Loader2 className="size-4 animate-spin" /> Loading tasks...
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6 sm:p-8 max-w-[1600px] mx-auto">
+        <div className="rounded-2xl border border-destructive/30 bg-destructive/10 p-4 text-sm text-destructive">
+          {error}
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -38,7 +79,7 @@ function Tasks() {
       <div className="flex items-end justify-between flex-wrap gap-4">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Tasks</h1>
-          <p className="text-sm text-muted-foreground mt-1">{tasks.length} tasks across {new Set(tasks.map(t => t.projectId)).size} projects</p>
+          <p className="text-sm text-muted-foreground mt-1">{tasks.length} tasks across {new Set(tasks.map((task) => (typeof task.project === "object" ? task.project?._id : task.project))).size} projects</p>
         </div>
         <button
           onClick={() => openCreate()}
@@ -71,9 +112,11 @@ function Tasks() {
       {view === "board" ? (
         <KanbanBoard
           tasks={tasks}
+          mode="api"
+          refetch={refetch}
           onCreate={(status) => openCreate(status)}
           onEdit={openEdit}
-          onDelete={(t) => setDeleting(t)}
+          onDelete={handleDelete}
         />
       ) : (
         <div className="bg-card border border-border rounded-2xl overflow-hidden shadow-soft">
@@ -92,22 +135,22 @@ function Tasks() {
             </thead>
             <tbody className="divide-y divide-border">
               {tasks.map((t) => {
-                const p = findProject(t.projectId);
-                const m = findMember(t.assignee);
+                const p = typeof t.project === "object" ? t.project : undefined;
+                const m = typeof t.assignee === "object" ? t.assignee : undefined;
                 return (
-                  <tr key={t.id} onClick={() => openEdit(t)} className="hover:bg-muted/40 cursor-pointer transition-colors">
-                    <td className="px-4 py-3 font-mono text-[11px] text-muted-foreground">{t.key}</td>
+                  <tr key={t._id} onClick={() => openEdit(t)} className="hover:bg-muted/40 cursor-pointer transition-colors">
+                    <td className="px-4 py-3 font-mono text-[11px] text-muted-foreground">{t._id.slice(-6).toUpperCase()}</td>
                     <td className="px-4 py-3">
                       <div className="font-medium">{t.title}</div>
-                      <div className="mt-1 flex gap-1">{t.tags.map((tg) => <Tag key={tg}>{tg}</Tag>)}</div>
+                      <div className="mt-1 flex gap-1"><Tag>task</Tag></div>
                     </td>
-                    <td className="px-4 py-3 text-xs">{p?.name}</td>
+                    <td className="px-4 py-3 text-xs">{p?.name ?? "Unassigned project"}</td>
                     <td className="px-4 py-3">
-                      <div className="flex items-center gap-2"><MemberAvatar member={m} size={22} /><span className="text-xs">{m.name.split(" ")[0]}</span></div>
+                      <div className="flex items-center gap-2"><MemberAvatar member={m ?? { name: "Unknown" }} size={22} /><span className="text-xs">{m?.name?.split(" ")[0] ?? "Unknown"}</span></div>
                     </td>
                     <td className="px-4 py-3"><PriorityBadge priority={t.priority} /></td>
                     <td className="px-4 py-3"><TaskStatusBadge status={t.status} /></td>
-                    <td className="px-4 py-3 text-right font-mono text-[11px] text-muted-foreground">{t.dueDate}</td>
+                    <td className="px-4 py-3 text-right font-mono text-[11px] text-muted-foreground">{t.dueDate ? new Date(t.dueDate).toLocaleDateString() : "—"}</td>
                     <td className="px-4 py-3 text-right">
                       <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
                         <button
@@ -118,7 +161,8 @@ function Tasks() {
                           <Pencil className="size-3.5" />
                         </button>
                         <button
-                          onClick={() => setDeleting(t)}
+                          onClick={() => void handleDelete(t)}
+                          disabled={deletingId === t._id}
                           className="p-1.5 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
                           aria-label="Delete task"
                         >
@@ -139,11 +183,7 @@ function Tasks() {
         onOpenChange={setFormOpen}
         task={editing}
         defaults={defaults}
-      />
-      <DeleteTaskDialog
-        task={deleting}
-        open={!!deleting}
-        onOpenChange={(o) => !o && setDeleting(null)}
+        refetch={refetch}
       />
     </div>
   );

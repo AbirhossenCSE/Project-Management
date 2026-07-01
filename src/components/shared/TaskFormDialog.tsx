@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { z } from "zod";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -8,17 +8,21 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { members, projects, type Priority, type Task, type TaskStatus } from "@/data/mock";
-import { createTask, deleteTask, updateTask } from "@/store/taskStore";
+import { Loader2 } from "lucide-react";
+import { useProjects } from "@/hooks";
+import { createTask, deleteTask, updateTask, type TaskPayload, type TaskStatus } from "@/services/task.service";
 import { cn } from "@/lib/utils";
+import type { TaskItem } from "@/hooks/useTasks";
+
+type Priority = NonNullable<TaskPayload["priority"]>;
 
 const schema = z.object({
   title: z.string().trim().min(3, "Title must be at least 3 characters").max(120, "Keep titles under 120 characters"),
   description: z.string().trim().max(2000, "Description is too long").optional().or(z.literal("")),
   projectId: z.string().min(1, "Select a project"),
-  assignee: z.string().min(1, "Assign a teammate"),
-  status: z.enum(["todo", "in_progress", "review", "done"]),
-  priority: z.enum(["low", "medium", "high", "urgent"]),
+  assigneeId: z.string().min(1, "Assign a teammate"),
+  status: z.enum(["todo", "in-progress", "done"]),
+  priority: z.enum(["low", "medium", "high"]),
   dueDate: z.string().min(1, "Pick a due date"),
   estimate: z.coerce.number().min(0, "Estimate cannot be negative").max(200, "Estimate too large"),
   tags: z.string().max(200).optional().or(z.literal("")),
@@ -28,8 +32,7 @@ type FormValues = z.infer<typeof schema>;
 
 const STATUS_OPTIONS: { value: TaskStatus; label: string }[] = [
   { value: "todo", label: "To Do" },
-  { value: "in_progress", label: "In Progress" },
-  { value: "review", label: "Review" },
+  { value: "in-progress", label: "In Progress" },
   { value: "done", label: "Done" },
 ];
 
@@ -37,8 +40,17 @@ const PRIORITY_OPTIONS: { value: Priority; label: string }[] = [
   { value: "low", label: "Low" },
   { value: "medium", label: "Medium" },
   { value: "high", label: "High" },
-  { value: "urgent", label: "Urgent" },
 ];
+
+function getProjectId(project?: TaskItem["project"]) {
+  if (!project) return "";
+  return typeof project === "string" ? project : project._id;
+}
+
+function getAssigneeId(assignee?: TaskItem["assignee"]) {
+  if (!assignee) return "";
+  return typeof assignee === "string" ? assignee : assignee._id;
+}
 
 function fmtDueForInput(due?: string) {
   if (!due) return "";
@@ -52,30 +64,43 @@ function fmtDueForDisplay(iso: string) {
   return d.toLocaleDateString("en-US", { month: "short", day: "2-digit" });
 }
 
-const empty = (defaults?: Partial<FormValues>): FormValues => ({
-  title: "",
-  description: "",
-  projectId: projects[0]?.id ?? "",
-  assignee: members[0]?.id ?? "",
-  status: "todo",
-  priority: "medium",
-  dueDate: new Date().toISOString().slice(0, 10),
-  estimate: 2,
-  tags: "",
-  ...defaults,
-});
-
 export interface TaskFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  task?: Task | null;
+  task?: TaskItem | null;
   defaults?: Partial<FormValues>;
+  refetch?: () => Promise<void> | void;
 }
 
-export function TaskFormDialog({ open, onOpenChange, task, defaults }: TaskFormDialogProps) {
+export function TaskFormDialog({ open, onOpenChange, task, defaults, refetch }: TaskFormDialogProps) {
   const isEdit = !!task;
-  const [values, setValues] = useState<FormValues>(empty(defaults));
+  const { projects } = useProjects();
+  const [values, setValues] = useState<FormValues>({
+    title: "",
+    description: "",
+    projectId: "",
+    assigneeId: "",
+    status: "todo",
+    priority: "medium",
+    dueDate: new Date().toISOString().slice(0, 10),
+    estimate: 2,
+    tags: "",
+    ...defaults,
+  });
   const [errors, setErrors] = useState<Partial<Record<keyof FormValues, string>>>({});
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+
+  const selectedProject = useMemo(
+    () => projects.find((project) => project._id === values.projectId) ?? projects[0],
+    [projects, values.projectId],
+  );
+
+  const assigneeOptions = useMemo(() => {
+    if (!selectedProject) return [];
+    const members = [selectedProject.owner, ...selectedProject.members];
+    return members.filter((member, index, array) => array.findIndex((candidate) => candidate._id === member._id) === index);
+  }, [selectedProject]);
 
   useEffect(() => {
     if (!open) return;
@@ -83,26 +108,69 @@ export function TaskFormDialog({ open, onOpenChange, task, defaults }: TaskFormD
       setValues({
         title: task.title,
         description: task.description ?? "",
-        projectId: task.projectId,
-        assignee: task.assignee,
+        projectId: getProjectId(task.project),
+        assigneeId: getAssigneeId(task.assignee),
         status: task.status,
         priority: task.priority,
         dueDate: fmtDueForInput(task.dueDate),
-        estimate: task.estimate ?? 0,
-        tags: (task.tags ?? []).join(", "),
+        estimate: 0,
+        tags: "",
       });
     } else {
-      setValues(empty(defaults));
+      const initialProjectId = defaults?.projectId ?? projects[0]?._id ?? "";
+      const initialProject = projects.find((project) => project._id === initialProjectId) ?? projects[0];
+      setValues({
+        title: "",
+        description: "",
+        projectId: initialProjectId,
+        assigneeId: defaults?.assigneeId ?? initialProject?.owner._id ?? "",
+        status: defaults?.status ?? "todo",
+        priority: defaults?.priority ?? "medium",
+        dueDate: new Date().toISOString().slice(0, 10),
+        estimate: defaults?.estimate ?? 2,
+        tags: defaults?.tags ?? "",
+      });
     }
     setErrors({});
-  }, [open, task, defaults]);
+    setSubmitError(null);
+  }, [open, task, defaults, projects]);
+
+  useEffect(() => {
+    if (!open || task) return;
+    if (!projects.length) return;
+
+    setValues((current) => {
+      const nextProjectId = current.projectId || projects[0]._id;
+      const nextProject = projects.find((project) => project._id === nextProjectId) ?? projects[0];
+      if (current.projectId === nextProjectId && current.assigneeId) {
+        return current;
+      }
+      return {
+        ...current,
+        projectId: nextProjectId,
+        assigneeId: current.assigneeId || nextProject.owner._id,
+      };
+    });
+  }, [open, task, projects]);
+
+  useEffect(() => {
+    if (!selectedProject || !values.assigneeId) return;
+    const validAssigneeIds = new Set(assigneeOptions.map((member) => member._id));
+    if (!validAssigneeIds.has(values.assigneeId)) {
+      setValues((current) => ({
+        ...current,
+        assigneeId: selectedProject.owner._id,
+      }));
+    }
+  }, [selectedProject, assigneeOptions, values.assigneeId]);
 
   function update<K extends keyof FormValues>(key: K, val: FormValues[K]) {
     setValues((v) => ({ ...v, [key]: val }));
     setErrors((e) => ({ ...e, [key]: undefined }));
+    setSubmitError(null);
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const parsed = schema.safeParse(values);
     if (!parsed.success) {
@@ -116,30 +184,37 @@ export function TaskFormDialog({ open, onOpenChange, task, defaults }: TaskFormD
       return;
     }
     const data = parsed.data;
-    const tags = (data.tags ?? "")
-      .split(",")
-      .map((s) => s.trim())
-      .filter(Boolean)
-      .slice(0, 8);
-    const payload = {
+    const payload: TaskPayload = {
       title: data.title,
       description: data.description ?? "",
-      projectId: data.projectId,
-      assignee: data.assignee,
+      project: data.projectId,
+      assignee: data.assigneeId,
       status: data.status,
       priority: data.priority,
-      dueDate: fmtDueForDisplay(data.dueDate),
-      estimate: data.estimate,
-      tags,
+      dueDate: data.dueDate,
     };
-    if (isEdit && task) {
-      updateTask(task.id, payload);
-      toast.success("Task updated", { description: data.title });
-    } else {
-      const created = createTask(payload);
-      toast.success("Task created", { description: `${created.key} · ${created.title}` });
+
+    setSubmitting(true);
+    setSubmitError(null);
+
+    try {
+      if (isEdit && task) {
+        await updateTask(task._id, payload);
+        toast.success("Task updated", { description: data.title });
+      } else {
+        await createTask(payload);
+        toast.success("Task created", { description: data.title });
+      }
+
+      await refetch?.();
+      onOpenChange(false);
+    } catch (err) {
+      const message = (err as { response?: { data?: { message?: string } } })?.response?.data?.message ?? `Failed to ${isEdit ? "update" : "create"} task`;
+      setSubmitError(message);
+      toast.error(message);
+    } finally {
+      setSubmitting(false);
     }
-    onOpenChange(false);
   }
 
   return (
@@ -149,11 +224,17 @@ export function TaskFormDialog({ open, onOpenChange, task, defaults }: TaskFormD
           <DialogHeader className="px-6 pt-6 pb-3 border-b border-border">
             <DialogTitle className="text-lg">{isEdit ? "Edit task" : "Create a new task"}</DialogTitle>
             <DialogDescription className="text-xs">
-              {isEdit ? `Editing ${task?.key}` : "Add details, assign a teammate, and set a due date."}
+              {isEdit ? `Editing ${task?._id?.slice(-6).toUpperCase() ?? "task"}` : "Add details, assign a teammate, and set a due date."}
             </DialogDescription>
           </DialogHeader>
 
           <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+            {submitError && (
+              <div className="rounded-xl border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive">
+                {submitError}
+              </div>
+            )}
+
             <Field label="Title" error={errors.title} required>
               <Input
                 autoFocus
@@ -180,21 +261,21 @@ export function TaskFormDialog({ open, onOpenChange, task, defaults }: TaskFormD
                   <SelectTrigger><SelectValue placeholder="Select project" /></SelectTrigger>
                   <SelectContent>
                     {projects.map((p) => (
-                      <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+                      <SelectItem key={p._id} value={p._id}>{p.name}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </Field>
 
-              <Field label="Assignee" error={errors.assignee} required>
-                <Select value={values.assignee} onValueChange={(v) => update("assignee", v)}>
+              <Field label="Assignee" error={errors.assigneeId} required>
+                <Select value={values.assigneeId} onValueChange={(v) => update("assigneeId", v)}>
                   <SelectTrigger><SelectValue placeholder="Assign to" /></SelectTrigger>
                   <SelectContent>
-                    {members.map((m) => (
-                      <SelectItem key={m.id} value={m.id}>
+                    {assigneeOptions.map((member) => (
+                      <SelectItem key={member._id} value={member._id}>
                         <span className="inline-flex items-center gap-2">
-                          <span className="size-5 rounded-full inline-flex items-center justify-center text-[9px] font-semibold text-white" style={{ background: m.color }}>{m.initials}</span>
-                          {m.name}
+                          <span className="size-5 rounded-full inline-flex items-center justify-center text-[9px] font-semibold text-white" style={{ background: "var(--primary)" }}>{member.name.slice(0, 2).toUpperCase()}</span>
+                          {member.name}
                         </span>
                       </SelectItem>
                     ))}
@@ -249,9 +330,10 @@ export function TaskFormDialog({ open, onOpenChange, task, defaults }: TaskFormD
           </div>
 
           <DialogFooter className="px-6 py-4 border-t border-border bg-muted/30">
-            <Button type="button" variant="ghost" onClick={() => onOpenChange(false)}>Cancel</Button>
-            <Button type="submit" className="gradient-primary text-white shadow-glow">
-              {isEdit ? "Save changes" : "Create task"}
+            <Button type="button" variant="ghost" onClick={() => onOpenChange(false)} disabled={submitting}>Cancel</Button>
+            <Button type="submit" className="gradient-primary text-white shadow-glow" disabled={submitting}>
+              {submitting ? <Loader2 className="mr-2 size-4 animate-spin" /> : null}
+              {isEdit ? (submitting ? "Saving..." : "Save changes") : submitting ? "Creating..." : "Create task"}
             </Button>
           </DialogFooter>
         </form>
@@ -289,12 +371,13 @@ function Field({
 }
 
 export interface DeleteTaskDialogProps {
-  task: Task | null;
+  task: TaskItem | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  refetch?: () => Promise<void> | void;
 }
 
-export function DeleteTaskDialog({ task, open, onOpenChange }: DeleteTaskDialogProps) {
+export function DeleteTaskDialog({ task, open, onOpenChange, refetch }: DeleteTaskDialogProps) {
   if (!task) return null;
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
@@ -302,7 +385,7 @@ export function DeleteTaskDialog({ task, open, onOpenChange }: DeleteTaskDialogP
         <AlertDialogHeader>
           <AlertDialogTitle>Delete this task?</AlertDialogTitle>
           <AlertDialogDescription>
-            <span className="font-mono text-xs">{task.key}</span> · {task.title}
+            <span className="font-mono text-xs">{task._id.slice(-6).toUpperCase()}</span> · {task.title}
             <br />
             This action cannot be undone.
           </AlertDialogDescription>
@@ -311,10 +394,16 @@ export function DeleteTaskDialog({ task, open, onOpenChange }: DeleteTaskDialogP
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <AlertDialogAction
             className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            onClick={() => {
-              deleteTask(task.id);
-              toast.success("Task deleted", { description: `${task.key} removed` });
-              onOpenChange(false);
+            onClick={async () => {
+              try {
+                await deleteTask(task._id);
+                await refetch?.();
+                toast.success("Task deleted", { description: `${task.title} removed` });
+                onOpenChange(false);
+              } catch (error) {
+                const message = (error as { response?: { data?: { message?: string } } })?.response?.data?.message ?? "Failed to delete task";
+                toast.error(message);
+              }
             }}
           >
             Delete task
