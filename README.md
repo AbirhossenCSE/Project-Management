@@ -1,20 +1,61 @@
-প্রকল্প স্ট্রাকচার পরিষ্কারকরণ
+Nexus.io — Project Management Suite
+A full-stack project management application with role-based dashboards for Admins and Members.
+🔗 Live Demo
+ember-project-suite.vercel.app
+🛠️ Tech Stack
+Frontend: React, TypeScript, Vite, TanStack Router, Tailwind CSS, shadcn/ui
+Backend: Node.js, Express, MongoDB Atlas, JWT Authentication
+Deployment: Vercel (Client + Server)
+✨ Features
 
-এই রেপোজিটরিটি সহজে নেভিগেট করার জন্য কিছু নন-ইনভেসিভ পরিবর্তন পেয়েছে:
+Role-based access control (Admin / Member)
+Admin dashboard with analytics and project health
+Project creation with member assignment
+Task management with Kanban board (drag & drop)
+Sprint planning and progress tracking
+Real-time data from MongoDB Atlas
+JWT authentication (register, login, logout)
 
-- `src/components/index.ts`: সব কম্পোনেন্ট বার্বেল (নির্দেশ্য: সহজ ইম্পোর্ট)
-- `src/components/ui/index.ts`: UI উপাদানগুলো এক জায়গা থেকে রিএক্সপোর্ট করে
-- `src/components/mpms/index.ts`: mpms বিভাগের উপাদানগুলো এক জায়গা থেকে রিএক্সপোর্ট করে
-- `src/lib/index.ts`: লাইব্রেরি ইউটিলিটি বার্বেল
-- `src/hooks/index.ts`: হুক বার্বেল
+🚀 Getting Started
+bash# Clone the repo
+git clone https://github.com/AbirhossenCSE/Project-Management.git
+cd Project-Management
 
-কেন করা হলো:
-- বড় ফোল্ডারগুলোতে সরাসরি ফাইল ইম্পোর্ট না করে সবগুলোকে এক জায়গা থেকে রিএক্সপোর্ট করলে ইম্পোর্ট লাইনগুলো পরিষ্কার হয়।
-- নতুন ফাইলগুলো কোডবেসকে রিফ্যাক্টর বা মুভ না করেই রিয়ারগানাইজ করে—ভাঙন (breaking) সৃষ্টি করে না।
+# Install client dependencies
+npm install
 
-ব্যবহার উদাহরণ:
+# Install server dependencies
+cd server && npm install
+⚙️ Environment Variables
+server/.env
+PORT=5000
+MONGO_URI=mongodb+srv://<username>:<password>@cluster0.mongodb.net/ember_project_suite
+JWT_SECRET=your_jwt_secret
+CLIENT_ORIGIN=http://localhost:5173
+NODE_ENV=development
+.env (client root)
+VITE_API_URL=http://localhost:5000/api/v1
+🏃 Running Locally
+bash# Terminal 1 — Start server
+cd server && npm run dev
 
-import { Button } from "src/components/ui";
-import { AppShell } from "src/components/mpms";
+# Terminal 2 — Start client
+npm run dev
+📁 Project Structure
+Project-Management/
+├── src/                  # React client
+│   ├── components/       # UI components
+│   ├── routes/           # Page routes (Admin + Member)
+│   ├── hooks/            # Custom React hooks
+│   ├── services/         # API service layer
+│   ├── store/            # State management
+│   └── types/            # TypeScript interfaces
+└── server/               # Express API
+    └── src/
+        ├── models/       # MongoDB models
+        ├── controllers/  # Business logic
+        ├── routes/       # API endpoints
+        └── middleware/   # JWT auth
+👤 Author
 
-যদি আপনি চান, আমি পরে কনফিগারেশন (tsconfig paths) বা আরো রিফ্যাক্টর করে ইম্পোর্টগুলো স্বল্প করতে পারি।
+AbirhossenCSE — GitHub
