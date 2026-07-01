@@ -1,64 +1,335 @@
-# Nexus.io — Project Management Suite
+# 🚀 Nexus.io — Project Management Suite
 
-A full-stack project management application with role-based dashboards for Admins and Members.
+A modern **full-stack Project Management Application** built to help teams efficiently manage projects, tasks, and sprints with secure role-based access control.
 
-## Live Demo
-ember-project-suite.vercel.app
+Designed with a clean UI, powerful dashboards, Kanban task management, and JWT authentication.
 
-🛠️ Tech Stack
-Frontend: React, TypeScript, Vite, TanStack Router, Tailwind CSS, shadcn/ui
-Backend: Node.js, Express, MongoDB Atlas, JWT Authentication
-Deployment: Vercel (Client + Server)
+---
 
-✨ Features
-Role-based access control (Admin / Member)
-Admin dashboard with analytics and project health
-Project creation with member assignment
-Task management with Kanban board (drag & drop)
-Sprint planning and progress tracking
-Real-time data from MongoDB Atlas
-JWT authentication (register, login, logout)
+## 🌐 Live Demo
 
-🚀 Getting Started
-bash# Clone the repo
-git clone https://github.com/AbirhossenCSE/Project-Management.git
-cd Project-Management
+🔗 **https://ember-project-suite.vercel.app**
 
-# Install client dependencies
-npm install
+---
 
-# Install server dependencies
-cd server && npm install
-⚙️ Environment Variables
-server/.env
-PORT=5000
-MONGO_URI=mongodb+srv://<username>:<password>@cluster0.mongodb.net/ember_project_suite
-JWT_SECRET=your_jwt_secret
-CLIENT_ORIGIN=http://localhost:5173
-NODE_ENV=development
-.env (client root)
-VITE_API_URL=http://localhost:5000/api/v1
-🏃 Running Locally
-bash# Terminal 1 — Start server
-cd server && npm run dev
+# ✨ Features
 
-# Terminal 2 — Start client
-npm run dev
-📁 Project Structure
+### 🔐 Authentication & Security
+- JWT Authentication
+- User Registration & Login
+- Secure Protected Routes
+- Role-Based Authorization
+- Persistent Authentication
+
+### 👨‍💼 Admin Features
+- Interactive Admin Dashboard
+- Project Analytics
+- Project Health Monitoring
+- Create & Manage Projects
+- Assign Members to Projects
+- Manage Users
+
+### 👨‍💻 Member Features
+- Personalized Dashboard
+- View Assigned Projects
+- Task Management
+- Sprint Progress Tracking
+- Update Task Status
+
+### 📋 Project Management
+- Create Projects
+- Edit Projects
+- Member Assignment
+- Project Progress Overview
+- Deadline Management
+
+### ✅ Task Management
+- Kanban Board
+- Drag & Drop Tasks
+- Task Status Updates
+- Task Assignment
+- Priority Management
+
+### 📊 Sprint Management
+- Sprint Planning
+- Progress Tracking
+- Completion Statistics
+
+### 🎨 UI/UX
+- Modern Responsive Design
+- Dark Clean Interface
+- Mobile Friendly
+- Reusable Components
+- Fast Navigation
+
+---
+
+# 🛠 Tech Stack
+
+## Frontend
+
+- React
+- TypeScript
+- Vite
+- TanStack Router
+- Tailwind CSS
+- shadcn/ui
+- Axios
+
+## Backend
+
+- Node.js
+- Express.js
+- MongoDB Atlas
+- Mongoose
+- JWT Authentication
+- bcrypt
+
+## Deployment
+
+- Vercel (Frontend)
+- Vercel Serverless Functions (Backend)
+
+---
+
+# 📂 Project Structure
+
+```text
 Project-Management/
-├── src/                  # React client
-│   ├── components/       # UI components
-│   ├── routes/           # Page routes (Admin + Member)
-│   ├── hooks/            # Custom React hooks
-│   ├── services/         # API service layer
-│   ├── store/            # State management
-│   └── types/            # TypeScript interfaces
-└── server/               # Express API
-    └── src/
-        ├── models/       # MongoDB models
-        ├── controllers/  # Business logic
-        ├── routes/       # API endpoints
-        └── middleware/   # JWT auth
-👤 Author
+│
+├── src/
+│   ├── assets/
+│   ├── components/
+│   ├── hooks/
+│   ├── lib/
+│   ├── routes/
+│   ├── services/
+│   ├── store/
+│   ├── types/
+│   ├── utils/
+│   ├── App.tsx
+│   └── main.tsx
+│
+├── server/
+│   └── src/
+│       ├── config/
+│       ├── controllers/
+│       ├── middleware/
+│       ├── models/
+│       ├── routes/
+│       ├── services/
+│       ├── utils/
+│       └── server.ts
+│
+├── package.json
+└── README.md
+```
 
-AbirhossenCSE — GitHub
+---
+
+# ⚙️ Environment Variables
+
+## Server (`server/.env`)
+
+```env
+PORT=5000
+
+MONGO_URI=mongodb+srv://<username>:<password>@cluster0.mongodb.net/ember_project_suite
+
+JWT_SECRET=your_jwt_secret
+
+CLIENT_ORIGIN=http://localhost:5173
+
+NODE_ENV=development
+```
+
+---
+
+## Client (`.env`)
+
+```env
+VITE_API_URL=http://localhost:5000/api/v1
+```
+
+---
+
+# 🚀 Getting Started
+
+## Clone the Repository
+
+```bash
+git clone https://github.com/AbirhossenCSE/Project-Management.git
+
+cd Project-Management
+```
+
+---
+
+## Install Dependencies
+
+### Client
+
+```bash
+npm install
+```
+
+### Server
+
+```bash
+cd server
+
+npm install
+```
+
+---
+
+# ▶️ Run the Application
+
+## Start Backend
+
+```bash
+cd server
+
+npm run dev
+```
+
+---
+
+## Start Frontend
+
+```bash
+npm run dev
+```
+
+---
+
+# 🔐 Authentication Flow
+
+```
+User
+   │
+   ▼
+Login / Register
+   │
+   ▼
+JWT Generated
+   │
+   ▼
+Stored in Browser
+   │
+   ▼
+Protected Routes
+   │
+   ▼
+Role Verification
+(Admin / Member)
+```
+
+---
+
+# 📸 Application Modules
+
+- 🔐 Authentication
+- 📊 Admin Dashboard
+- 👨‍💻 Member Dashboard
+- 📁 Project Management
+- ✅ Task Management
+- 📌 Kanban Board
+- 🚀 Sprint Planning
+- 📈 Analytics
+- 👥 Team Management
+
+---
+
+# 💻 API
+
+Base URL
+
+```text
+http://localhost:5000/api/v1
+```
+
+Example Endpoints
+
+```text
+POST    /auth/register
+
+POST    /auth/login
+
+GET     /projects
+
+POST    /projects
+
+PUT     /projects/:id
+
+DELETE  /projects/:id
+
+GET     /tasks
+
+POST    /tasks
+
+PUT     /tasks/:id
+
+DELETE  /tasks/:id
+```
+
+---
+
+# 🎯 Future Improvements
+
+- Notifications
+- File Uploads
+- Team Chat
+- Calendar Integration
+- Activity Timeline
+- Email Invitations
+- Comments System
+- Project Templates
+- Time Tracking
+- Performance Reports
+
+---
+
+# 🤝 Contributing
+
+Contributions are welcome!
+
+1. Fork the repository
+
+2. Create a feature branch
+
+```bash
+git checkout -b feature/new-feature
+```
+
+3. Commit your changes
+
+```bash
+git commit -m "Add new feature"
+```
+
+4. Push the branch
+
+```bash
+git push origin feature/new-feature
+```
+
+5. Open a Pull Request
+
+---
+
+# 📄 License
+
+This project is licensed under the **MIT License**.
+
+---
+
+# 👨‍💻 Author
+
+### Abir Hossen
+
+- GitHub: **https://github.com/AbirhossenCSE**
+
+---
+
+## ⭐ If you found this project helpful, don't forget to give it a Star!
