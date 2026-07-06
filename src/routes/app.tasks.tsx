@@ -6,6 +6,7 @@ import { KanbanBoard } from "@/components/shared/Kanban";
 import { DeleteTaskDialog, TaskFormDialog } from "@/components/shared/TaskFormDialog";
 import { getMe } from "@/services/auth.service";
 import { useTasks } from "@/hooks";
+import { TaskTableSkeleton } from "@/components/shared/Skeleton";
 import type { TaskItem } from "@/hooks/useTasks";
 
 export const Route = createFileRoute("/app/tasks")({
@@ -58,13 +59,7 @@ function MyTasks() {
   }
 
   if (loading || !currentUserId) {
-    return (
-      <div className="p-6 sm:p-8 max-w-[1600px] mx-auto flex min-h-[50vh] items-center justify-center">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Loader2 className="size-4 animate-spin" /> Loading your tasks...
-        </div>
-      </div>
-    );
+    return <TaskTableSkeleton />;
   }
 
   if (error || currentUserError) {

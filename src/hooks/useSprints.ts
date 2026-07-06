@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 
 import { getSprints } from "@/services/sprint.service";
 
@@ -17,9 +17,12 @@ export function useSprints(projectId: string | string[]) {
     const [sprints, setSprints] = useState<SprintItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const hasLoadedOnce = useRef(false);
+
+    const serializedProjectId = Array.isArray(projectId) ? projectId.join(",") : projectId;
 
     const refetch = useCallback(async () => {
-        const projectIds = Array.isArray(projectId) ? projectId : [projectId];
+        const projectIds = serializedProjectId ? serializedProjectId.split(",") : [];
         const filteredProjectIds = projectIds.filter(Boolean);
 
         if (filteredProjectIds.length === 0) {
@@ -28,7 +31,9 @@ export function useSprints(projectId: string | string[]) {
             return;
         }
 
-        setLoading(true);
+        if (!hasLoadedOnce.current) {
+            setLoading(true);
+        }
         setError(null);
 
         try {
@@ -40,8 +45,9 @@ export function useSprints(projectId: string | string[]) {
             setError(message);
         } finally {
             setLoading(false);
+            hasLoadedOnce.current = true;
         }
-    }, [projectId]);
+    }, [serializedProjectId]);
 
     useEffect(() => {
         void refetch();

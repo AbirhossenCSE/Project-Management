@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { ProgressBar } from "@/components/shared/Progress";
 import { getMe } from "@/services/auth.service";
 import { useProjects, useSprints } from "@/hooks";
+import { ProjectGridSkeleton } from "@/components/shared/Skeleton";
 
 export const Route = createFileRoute("/app/sprints")({
   component: Sprints,
@@ -37,7 +38,7 @@ function Sprints() {
     () => projects.filter((project) => project.owner._id === currentUserId || project.members.some((member) => member._id === currentUserId)),
     [projects, currentUserId],
   );
-  const projectIds = memberProjects.map((project) => project._id);
+  const projectIds = useMemo(() => memberProjects.map((project) => project._id), [memberProjects]);
   const { sprints, loading: sprintsLoading, error: sprintsError } = useSprints(projectIds);
 
   const loading = projectsLoading || sprintsLoading || !currentUserId;
@@ -45,13 +46,7 @@ function Sprints() {
   const activeSprints = sprints.filter((sprint) => sprint.status === "active");
 
   if (loading) {
-    return (
-      <div className="p-6 sm:p-8 space-y-6 max-w-[1400px] mx-auto flex min-h-[50vh] items-center justify-center">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Loader2 className="size-4 animate-spin" /> Loading sprints...
-        </div>
-      </div>
-    );
+    return <ProjectGridSkeleton />;
   }
 
   if (error) {

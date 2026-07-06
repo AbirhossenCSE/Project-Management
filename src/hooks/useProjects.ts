@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 
 import { getProjects } from "@/services/project.service";
 
@@ -24,9 +24,12 @@ export function useProjects() {
     const [projects, setProjects] = useState<ProjectItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const hasLoadedOnce = useRef(false);
 
     const refetch = useCallback(async () => {
-        setLoading(true);
+        if (!hasLoadedOnce.current) {
+            setLoading(true);
+        }
         setError(null);
 
         try {
@@ -37,6 +40,7 @@ export function useProjects() {
             setError(message);
         } finally {
             setLoading(false);
+            hasLoadedOnce.current = true;
         }
     }, []);
 

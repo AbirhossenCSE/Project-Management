@@ -1,13 +1,29 @@
 import { Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import {
   LayoutDashboard, FolderKanban, Zap, ListChecks, Users, BarChart3, Settings,
-  Search, Bell, Plus, Command, CalendarDays, Activity, Menu, Sun, LogOut,
+  Search, Bell, Plus, Command, CalendarDays, Activity, Menu, Sun, LogOut, Moon,
 } from "lucide-react";
-import { useState, type ReactNode } from "react";
+import { useState, type ReactNode, useEffect, useRef, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { MemberAvatar } from "../shared/Avatar";
 import { logout } from "@/services/auth.service";
 import { useAuthUser } from "./auth-user-context";
+import { useProjects, useTasks } from "@/hooks";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  CommandDialog,
+  CommandInput,
+  CommandList,
+  CommandEmpty,
+  CommandGroup,
+  CommandItem,
+  CommandSeparator,
+} from "@/components/ui/command";
 
 type NavItem = { to: string; label: string; icon: typeof LayoutDashboard; badge?: string };
 
@@ -48,6 +64,44 @@ export function AppShell({
   const { user } = useAuthUser();
   const profileMember = user ? { id: user.id, name: user.name, avatar: user.avatar } : { id: role === "admin" ? "m1" : "m2", name: role === "admin" ? "Admin" : "Member" };
   const profileLabel = user ? `${user.role === "admin" ? "Admin" : "Member"} · ${user.email}` : (role === "admin" ? "Admin · Workspace owner" : "Member · Engineering");
+
+  const [theme, setTheme] = useState<"light" | "dark">(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("theme");
+      if (saved === "dark" || saved === "light") return saved;
+      return document.documentElement.classList.contains("dark") ? "dark" : "light";
+    }
+    return "light";
+  });
+
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const searchInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (theme === "dark") {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+    localStorage.setItem("theme", theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prev => (prev === "dark" ? "light" : "dark"));
+  };
+
+  useEffect(() => {
+    const down = (e: KeyboardEvent) => {
+      if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        searchInputRef.current?.focus();
+        setSearchOpen(true);
+      }
+    };
+    document.addEventListener("keydown", down);
+    return () => document.removeEventListener("keydown", down);
+  }, []);
 
   function handleLogout() {
     logout();
@@ -158,7 +212,7 @@ export function AppShell({
 
       {/* Main */}
       <main className="flex-1 flex flex-col min-w-0">
-        <header className="h-16 border-b border-border bg-card/70 glass flex items-center justify-between px-4 sm:px-8 gap-4 shrink-0">
+        <header className="relative z-[100] h-16 border-b border-border bg-card/70 glass flex items-center justify-between px-4 sm:px-8 gap-4 shrink-0 overflow-visible">
           <div className="flex items-center gap-3 min-w-0">
             <button
               className="lg:hidden p-1.5 rounded-md hover:bg-muted"
@@ -171,31 +225,85 @@ export function AppShell({
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3">
-            <div className="relative hidden md:block">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
-              <input
-                type="text"
-                placeholder="Search tasks, projects…"
-                className="bg-muted/60 border border-transparent focus:border-primary/30 focus:bg-card rounded-md py-1.5 pl-9 pr-16 text-xs w-72 outline-none transition-all"
-              />
-              <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-1">
-                <kbd className="px-1.5 py-0.5 rounded border border-border bg-card text-[10px] font-mono text-muted-foreground">
-                  <Command className="size-2.5 inline" />K
-                </kbd>
+            {/* Search Input with Autocomplete dropdown */}
+            <div className="relative hidden md:block z-[9999]">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground" />
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  placeholder="Search tasks, projects…"
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setSearchOpen(true);
+                  }}
+                  onFocus={() => setSearchOpen(true)}
+                  onBlur={() => {
+                    setTimeout(() => setSearchOpen(false), 200);
+                  }}
+                  className="bg-muted/60 border border-transparent focus:border-primary/30 focus:bg-card rounded-md py-1.5 pl-9 pr-16 text-xs w-72 outline-none transition-all text-foreground"
+                />
+                <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-1">
+                  <kbd className="px-1.5 py-0.5 rounded border border-border bg-card text-[10px] font-mono text-muted-foreground">
+                    <Command className="size-2.5 inline" />K
+                  </kbd>
+                </div>
+
+                {/* Autocomplete dropdown directly below search bar */}
+                {searchOpen && (
+                  <div 
+                    className="absolute border border-border max-h-[350px] overflow-y-auto"
+                    style={{
+                      position: "absolute",
+                      top: "calc(100% + 8px)",
+                      left: 0,
+                      zIndex: 99999,
+                      minWidth: "400px",
+                      background: "var(--card, white)",
+                      borderRadius: "8px",
+                      boxShadow: "0 4px 20px rgba(0, 0, 0, 0.15)",
+                    }}
+                    onMouseDown={(e) => {
+                      e.preventDefault();
+                    }}
+                  >
+                    <SearchDropdownContent 
+                      searchQuery={searchQuery}
+                      role={role} 
+                      navigate={navigate} 
+                      setOpen={setSearchOpen} 
+                    />
+                  </div>
+                )}
               </div>
             </div>
-            <button className="relative p-2 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors">
-              <Bell className="size-4" />
-              <span className="absolute top-1.5 right-1.5 size-1.5 rounded-full bg-destructive" />
+
+            {/* Notification bell dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="relative p-2 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
+                  <Bell className="size-4" />
+                  <span className="absolute top-1.5 right-1.5 size-1.5 rounded-full bg-destructive" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuItem className="text-xs text-muted-foreground justify-center py-3">
+                  No notifications yet
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* Theme Toggle */}
+            <button 
+              onClick={toggleTheme}
+              className="p-2 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors hidden sm:block cursor-pointer" 
+              aria-label="Theme"
+            >
+              {theme === "dark" ? <Sun className="size-4" /> : <Moon className="size-4" />}
             </button>
-            <button className="p-2 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors hidden sm:block" aria-label="Theme">
-              <Sun className="size-4" />
-            </button>
-            {actions ?? (
-              <button className="bg-primary text-primary-foreground px-3 py-1.5 rounded-md text-xs font-medium hover:opacity-90 shadow-glow transition-all inline-flex items-center gap-1.5">
-                <Plus className="size-3.5" /> New
-              </button>
-            )}
+
+            {actions}
           </div>
         </header>
 
@@ -203,6 +311,93 @@ export function AppShell({
           <div className="animate-fade-up">{children ?? <Outlet />}</div>
         </div>
       </main>
+    </div>
+  );
+}
+
+function SearchDropdownContent({
+  searchQuery,
+  role,
+  navigate,
+  setOpen,
+}: {
+  searchQuery: string;
+  role: "admin" | "user";
+  navigate: any;
+  setOpen: (open: boolean) => void;
+}) {
+  const { projects } = useProjects();
+  const { tasks } = useTasks();
+
+  const query = searchQuery.trim().toLowerCase();
+
+  const filteredProjects = useMemo(() => {
+    if (!projects) return [];
+    if (!query) return projects.slice(0, 5);
+    return projects.filter((p) => p.name.toLowerCase().includes(query)).slice(0, 5);
+  }, [projects, query]);
+
+  const filteredTasks = useMemo(() => {
+    if (!tasks) return [];
+    if (!query) return tasks.slice(0, 5);
+    return tasks.filter((t) => t.title.toLowerCase().includes(query)).slice(0, 5);
+  }, [tasks, query]);
+
+  const hasResults = filteredProjects.length > 0 || filteredTasks.length > 0;
+
+  return (
+    <div className="p-2 space-y-3 text-xs">
+      {!hasResults && (
+        <div className="py-6 text-center text-muted-foreground">
+          No results found.
+        </div>
+      )}
+
+      {filteredProjects.length > 0 && (
+        <div>
+          <div className="px-2 py-1 text-[10px] font-semibold text-muted-foreground uppercase tracking-widest border-b border-border/40 mb-1">
+            Projects
+          </div>
+          <div className="space-y-0.5">
+            {filteredProjects.map((project) => (
+              <button
+                key={project._id}
+                onClick={() => {
+                  setOpen(false);
+                  void navigate({ to: role === "admin" ? `/admin/projects/${project._id}` : `/app/projects` });
+                }}
+                className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted text-left transition-colors cursor-pointer text-[11px]"
+              >
+                <FolderKanban className="size-3.5 text-muted-foreground shrink-0" />
+                <span className="font-medium truncate">{project.name}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {filteredTasks.length > 0 && (
+        <div>
+          <div className="px-2 py-1 text-[10px] font-semibold text-muted-foreground uppercase tracking-widest border-b border-border/40 mb-1">
+            Tasks
+          </div>
+          <div className="space-y-0.5">
+            {filteredTasks.map((task) => (
+              <button
+                key={task._id}
+                onClick={() => {
+                  setOpen(false);
+                  void navigate({ to: role === "admin" ? `/admin/tasks` : `/app/tasks` });
+                }}
+                className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-muted text-left transition-colors cursor-pointer text-[11px]"
+              >
+                <ListChecks className="size-3.5 text-muted-foreground shrink-0" />
+                <span className="font-medium truncate">{task.title}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

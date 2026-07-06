@@ -6,6 +6,7 @@ import { StatusBadge } from "@/components/shared/Badges";
 import { AvatarGroup, MemberAvatar } from "@/components/shared/Avatar";
 import { cn } from "@/lib/utils";
 import { useProjects, useUsers } from "@/hooks";
+import { ProjectGridSkeleton } from "@/components/shared/Skeleton";
 import type { ProjectItem } from "@/hooks/useProjects";
 import { createProject, deleteProject, updateProject, type ProjectPayload, type ProjectStatus } from "@/services/project.service";
 import { Input } from "@/components/ui/input";
@@ -144,13 +145,7 @@ function Projects() {
   }
 
   if (loadingState) {
-    return (
-      <div className="p-6 sm:p-8 max-w-[1600px] mx-auto flex min-h-[50vh] items-center justify-center">
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Loader2 className="size-4 animate-spin" /> Loading projects...
-        </div>
-      </div>
-    );
+    return <ProjectGridSkeleton />;
   }
 
   if (error || usersError) {
