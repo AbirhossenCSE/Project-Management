@@ -38,23 +38,19 @@ function Login() {
 
   return (
     <AuthLayout
-      title="Welcome back"
-      subtitle="Sign in to your workspace to continue."
+      title=""
+      subtitle=""
       footer={<>Don't have an account? <Link to="/register" className="text-primary font-medium hover:underline">Create one</Link></>}
     >
-      <div className="space-y-2 mb-5">
-        <AuthButton variant="outline" type="button" disabled={loading}>
-          <span className="size-4 rounded-full bg-foreground/80" /> Continue with Google
-        </AuthButton>
-        <AuthButton variant="outline" type="button" disabled={loading}>
-          <span className="size-4 rounded-sm bg-foreground/80" /> Continue with GitHub
-        </AuthButton>
+      <div className="mb-6 space-y-2 animate-fade-up">
+        <span className="text-[10px] uppercase font-bold tracking-widest text-primary bg-primary/10 px-2.5 py-1 rounded-full">
+          Project Management
+        </span>
+        <h1 className="text-2xl font-semibold tracking-tight mt-3">Welcome back</h1>
+        <p className="text-xs text-muted-foreground">Sign in to your workspace to continue.</p>
       </div>
-      <div className="relative my-5 text-center">
-        <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-border" /></div>
-        <span className="relative bg-background px-2 text-[10px] uppercase tracking-widest text-muted-foreground">or with email</span>
-      </div>
-      <form onSubmit={handleSubmit}>
+
+      <form onSubmit={handleSubmit} className="space-y-4 animate-fade-up">
         <AuthInput
           label="Email"
           type="email"
@@ -70,16 +66,16 @@ function Login() {
           placeholder="••••••••"
           value={password}
           onChange={(event) => setPassword(event.target.value)}
-          right={<Link to="/forgot-password" className="text-[11px] text-primary hover:underline">Forgot?</Link>}
+          right={<Link to="/login" className="text-[11px] text-primary hover:underline">Forgot?</Link>}
           disabled={loading}
           required
         />
-        <label className="flex items-center gap-2 mb-3 text-xs text-muted-foreground cursor-pointer">
+        <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer select-none py-1">
           <input type="checkbox" className="size-3.5 rounded border-border" defaultChecked disabled={loading} />
           Keep me signed in for 30 days
         </label>
-        {error && <p className="mb-3 text-xs font-medium text-destructive">{error}</p>}
-        <AuthButton type="submit" disabled={loading}>
+        {error && <p className="text-xs font-medium text-destructive animate-fade-up">{error}</p>}
+        <AuthButton type="submit" disabled={loading} className="mt-2">
           {loading ? "Signing in..." : "Sign in"}
         </AuthButton>
       </form>
