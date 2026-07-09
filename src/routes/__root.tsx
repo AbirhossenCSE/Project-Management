@@ -107,7 +107,9 @@ function RootComponent() {
 
         setCurrentUser(null);
         logout();
-        void navigate({ to: "/login" });
+        if (pathname !== "/superadmin") {
+          void navigate({ to: "/login" });
+        }
       });
 
     return () => {
