@@ -69,11 +69,20 @@ export async function register(req: Request, res: Response): Promise<void> {
         }
 
         const hashedPassword = await bcrypt.hash(password, 12);
+
+        let finalRole: "admin" | "member" = "member";
+        const superAdminSecret = process.env.SUPER_ADMIN_SECRET;
+        const secretHeader = req.header("super-admin-secret") || req.header("super_admin_secret") || req.header("SUPER_ADMIN_SECRET");
+
+        if (role === "admin" && superAdminSecret && secretHeader === superAdminSecret) {
+            finalRole = "admin";
+        }
+
         const createdUser = await User.create({
             name: name.trim(),
             email: normalizedEmail,
             password: hashedPassword,
-            role: role ?? "member",
+            role: finalRole,
             avatar: avatar ?? "",
         });
 

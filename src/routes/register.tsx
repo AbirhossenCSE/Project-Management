@@ -19,7 +19,6 @@ function Register() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [role, setRole] = useState<"admin" | "member">("member");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -53,7 +52,7 @@ function Register() {
     setLoading(true);
 
     try {
-      const response = await register(fullName.trim(), email, password, role);
+      const response = await register(fullName.trim(), email, password, "member");
       const userRole = response.data.user.role;
       await navigate({ to: userRole === "admin" ? "/admin" : "/app" });
     } catch (err) {
@@ -128,19 +127,6 @@ function Register() {
             </span>
           </div>
         )}
-
-        <div className="mb-4">
-          <span className="block text-xs font-medium text-foreground mb-1.5">Your Role</span>
-          <select
-            value={role}
-            onChange={(e) => setRole(e.target.value as "admin" | "member")}
-            className="w-full bg-card border border-border focus:border-primary focus:ring-2 focus:ring-primary/15 rounded-md px-3 py-2 text-sm outline-none transition-all cursor-pointer text-foreground"
-            disabled={loading}
-          >
-            <option value="member">Member (view & update assigned tasks)</option>
-            <option value="admin">Administrator (full dashboard planning & setups)</option>
-          </select>
-        </div>
 
         <label className="flex items-start gap-2 text-xs text-muted-foreground cursor-pointer select-none py-1">
           <input type="checkbox" className="mt-0.5 size-3.5 rounded border-border" defaultChecked disabled={loading} />
