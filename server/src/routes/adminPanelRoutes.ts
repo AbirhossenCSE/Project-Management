@@ -1,49 +1,39 @@
 import { Router, type Request, type Response, type NextFunction } from "express";
-import { updateUserRole } from "../controllers/adminPanelController";
+import { updateUserRole, deleteUser } from "../controllers/adminPanelController";
 import { requireAuth, type AuthenticatedRequest } from "../middleware/auth";
 import User from "../models/User";
 
 const router = Router();
 
-function verifySuperAdmin(req: Request, res: Response, next: NextFunction): void {
-    const superAdminSecret = process.env.SUPER_ADMIN_SECRET;
-    const headerVal = req.header("X-Super-Admin");
+async function verifySuperAdmin(req: AuthenticatedRequest, res: Response, next: NextFunction): Promise<void> {
+    try {
+        if (!req.userId) {
+            res.status(401).json({ success: false, message: "Unauthorized" });
+            return;
+        }
 
-    if (!superAdminSecret || headerVal !== superAdminSecret) {
-        res.status(403).json({ success: false, message: "Unauthorized" });
-        return;
+        const user = await User.findById(req.userId);
+        if (!user || user.email !== "superadmin@gmail.com") {
+            res.status(403).json({ success: false, message: "Access Denied - Restricted to Super Admin only" });
+            return;
+        }
+        next();
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: "Server error during verification" });
     }
-    next();
 }
 
-router.use(verifySuperAdmin);
+router.use(requireAuth);
+router.use((req, res, next) => {
+    void verifySuperAdmin(req as AuthenticatedRequest, res, next);
+});
 
 // PATCH /admin-panel/users/:id/role
 router.patch("/users/:id/role", updateUserRole);
 
 // DELETE /admin-panel/users/:id
-router.delete("/users/:id", requireAuth, async (req: AuthenticatedRequest, res: Response): Promise<void> => {
-    try {
-        const { id } = req.params;
-        const loggedInUserId = req.userId || (typeof req.user === "object" ? (req.user as any)?.id : null);
-
-        if (id === loggedInUserId) {
-            res.status(400).json({ success: false, message: "Cannot delete yourself" });
-            return;
-        }
-
-        const user = await User.findByIdAndDelete(id);
-        if (!user) {
-            res.status(404).json({ success: false, message: "User not found" });
-            return;
-        }
-
-        res.status(200).json({ success: true, message: "User deleted" });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ success: false, message: "Failed to delete user" });
-    }
-});
+router.delete("/users/:id", requireAuth, deleteUser);
 
 // GET /admin-panel/users
 router.get("/users", async (req: Request, res: Response): Promise<void> => {

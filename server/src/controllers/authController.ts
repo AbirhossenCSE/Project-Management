@@ -164,3 +164,69 @@ export async function getMe(req: AuthenticatedRequest, res: Response): Promise<v
         res.status(500).json({ success: false, message: "Failed to fetch current user" });
     }
 }
+
+export async function updateUserRole(req: Request, res: Response): Promise<void> {
+    try {
+        const { id } = req.params;
+        const { role } = req.body as { role?: string };
+
+        if (role !== "admin" && role !== "member") {
+            res.status(400).json({ success: false, message: "Role must be 'admin' or 'member' only" });
+            return;
+        }
+
+        const user = await User.findById(id);
+        if (!user) {
+            res.status(404).json({ success: false, message: "User not found" });
+            return;
+        }
+
+        if (user.email === "superadmin@gmail.com") {
+            res.status(400).json({ success: false, message: "Cannot change Super Admin role" });
+            return;
+        }
+
+        user.role = role as "admin" | "member";
+        await user.save();
+
+        res.status(200).json({
+            success: true,
+            data: {
+                user: {
+                    id: user._id.toString(),
+                    name: user.name,
+                    email: user.email,
+                    role: user.role,
+                    avatar: user.avatar,
+                    createdAt: user.createdAt,
+                },
+            },
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: "Failed to update user role" });
+    }
+}
+
+export async function deleteUser(req: Request, res: Response): Promise<void> {
+    try {
+        const { id } = req.params;
+
+        const user = await User.findById(id);
+        if (!user) {
+            res.status(404).json({ success: false, message: "User not found" });
+            return;
+        }
+
+        if (user.email === "superadmin@gmail.com") {
+            res.status(400).json({ success: false, message: "Cannot delete Super Admin account" });
+            return;
+        }
+
+        await User.findByIdAndDelete(id);
+        res.status(200).json({ success: true, message: "User deleted" });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: "Failed to delete user" });
+    }
+}

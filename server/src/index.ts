@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 import express, { type NextFunction, type Request, type Response } from "express";
 
 import connectDB from "./config/db";
+import seedSuperAdmin from "./config/seedSuperAdmin";
 import routes from "./routes/index";
 
 dns.setServers(["8.8.8.8", "8.8.4.4"]);
@@ -31,6 +32,7 @@ app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
 async function startServer(): Promise<void> {
     try {
         await connectDB();
+        await seedSuperAdmin();
 
         if (process.env.NODE_ENV !== "production") {
             app.listen(port, () => {

@@ -6,28 +6,16 @@ export async function getUsers() {
 }
 
 export async function updateUserRole(userId: string, role: "admin" | "member") {
-    const secret = import.meta.env.VITE_SA_PASSWORD || "nexus_super_2026";
     const response = await api.patch(
         `/admin-panel/users/${userId}/role`,
-        { role },
-        {
-            headers: {
-                "X-Super-Admin": secret,
-            },
-        }
+        { role }
     );
     return response.data;
 }
 
 export async function deleteUser(userId: string) {
-    const secret = import.meta.env.VITE_SA_PASSWORD || "nexus_super_2026";
     const response = await api.delete(
-        `/admin-panel/users/${userId}`,
-        {
-            headers: {
-                "X-Super-Admin": secret,
-            },
-        }
+        `/admin-panel/users/${userId}`
     );
     return response.data;
 }

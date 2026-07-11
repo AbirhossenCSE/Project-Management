@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { getUsers, updateUserRole, deleteUser } from "@/services/admin.service";
-import { Loader2, ShieldAlert, KeyRound, User, LogOut, CheckCircle2, AlertCircle, Trash2 } from "lucide-react";
+import { Loader2, ShieldAlert, User, CheckCircle2, AlertCircle, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useAuthUser } from "@/components/layout/auth-user-context";
+import { getMe, type AuthUser } from "@/services/auth.service";
 
 export const Route = createFileRoute("/superadmin")({
   head: () => ({ meta: [{ title: "Super Admin Panel — Nexus.io" }] }),
@@ -15,9 +16,8 @@ function SuperAdminPanel() {
   const { user: loggedInUser } = useAuthUser();
   const [deletingUserId, setDeletingUserId] = useState<string | null>(null);
 
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [password, setPassword] = useState("");
-  const [authError, setAuthError] = useState("");
+  const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
+  const [verifying, setVerifying] = useState(true);
   
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
@@ -25,21 +25,34 @@ function SuperAdminPanel() {
   const [updatingUserId, setUpdatingUserId] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState("");
 
-  const SA_PASSWORD = import.meta.env.VITE_SA_PASSWORD || "nexus_super_2026";
   const hasToken = typeof window !== "undefined" && !!localStorage.getItem("token");
 
   useEffect(() => {
-    const savedPassword = localStorage.getItem("sa_auth");
-    if (savedPassword === SA_PASSWORD) {
-      setIsAuthenticated(true);
+    async function verifyAccess() {
+      const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+      if (!token) {
+        setVerifying(false);
+        return;
+      }
+      try {
+        const res = await getMe();
+        if (res.success && res.data?.user) {
+          setCurrentUser(res.data.user);
+        }
+      } catch (err) {
+        console.error("Failed to verify super admin access", err);
+      } finally {
+        setVerifying(false);
+      }
     }
-  }, [SA_PASSWORD]);
+    void verifyAccess();
+  }, []);
 
   useEffect(() => {
-    if (isAuthenticated && hasToken) {
-      fetchUsers();
+    if (currentUser?.email === "superadmin@gmail.com" && hasToken) {
+      void fetchUsers();
     }
-  }, [isAuthenticated, hasToken]);
+  }, [currentUser, hasToken]);
 
   async function fetchUsers() {
     setLoading(true);
@@ -57,24 +70,6 @@ function SuperAdminPanel() {
     } finally {
       setLoading(false);
     }
-  }
-
-  function handleLogin(e: React.FormEvent) {
-    e.preventDefault();
-    setAuthError("");
-    if (password === SA_PASSWORD) {
-      localStorage.setItem("sa_auth", password);
-      setIsAuthenticated(true);
-    } else {
-      setAuthError("Incorrect password");
-    }
-  }
-
-  function handleLogout() {
-    localStorage.removeItem("sa_auth");
-    setIsAuthenticated(false);
-    setPassword("");
-    setUsers([]);
   }
 
   async function handleRoleChange(userId: string, newRole: "admin" | "member") {
@@ -104,7 +99,7 @@ function SuperAdminPanel() {
       return;
     }
 
-    if (!window.confirm(`Are you sure you want to delete ${userName}?`)) {
+    if (!window.confirm("Are you sure you want to delete " + userName + "?")) {
       return;
     }
 
@@ -125,47 +120,42 @@ function SuperAdminPanel() {
     }
   }
 
-  if (!isAuthenticated) {
+  if (verifying) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-background px-4 py-12 sm:px-6 lg:px-8">
-        <div className="max-w-md w-full space-y-8 bg-card border border-border p-8 rounded-2xl shadow-soft">
-          <div className="text-center">
-            <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-primary/10 text-primary mb-4">
-              <KeyRound className="h-6 w-6" />
-            </div>
-            <h2 className="text-2xl font-bold tracking-tight text-foreground">Super Admin Access</h2>
-            <p className="mt-2 text-xs text-muted-foreground">Please enter the super admin password to unlock the panel.</p>
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="flex flex-col items-center justify-center gap-3">
+          <Loader2 className="size-8 text-primary animate-spin" />
+          <p className="text-sm text-muted-foreground font-medium">Verifying super admin access...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!currentUser || currentUser.email !== "superadmin@gmail.com") {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background px-4 py-12 sm:px-6 lg:px-8 animate-fade-in">
+        <div className="max-w-md w-full space-y-6 bg-card border border-border p-8 rounded-2xl shadow-soft text-center">
+          <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-destructive/10 text-destructive mb-4">
+            <ShieldAlert className="h-6 w-6" />
           </div>
-          <form className="mt-8 space-y-6" onSubmit={handleLogin}>
-            <div className="rounded-md shadow-sm -space-y-px">
-              <div>
-                <input
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="w-full bg-background border border-border focus:border-primary focus:ring-2 focus:ring-primary/15 rounded-md px-3 py-2 text-sm outline-none transition-all"
-                  placeholder="Super Admin Password"
-                />
-              </div>
-            </div>
-
-            {authError && (
-              <div className="flex items-center gap-2 text-xs font-medium text-destructive bg-destructive/10 p-3 rounded-lg animate-fade-up">
-                <AlertCircle className="size-4 shrink-0" />
-                {authError}
-              </div>
-            )}
-
-            <div>
-              <button
-                type="submit"
-                className="w-full gradient-primary text-white py-2 px-4 rounded-md text-sm font-semibold shadow-glow hover:opacity-90 transition-opacity cursor-pointer"
-              >
-                Unlock Panel
-              </button>
-            </div>
-          </form>
+          <h2 className="text-xl font-bold tracking-tight text-foreground">Access Denied</h2>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Access Denied — This panel is restricted to Super Admin only.
+          </p>
+          <div className="mt-6 flex flex-col gap-2">
+            <Link
+              to="/admin"
+              className="w-full inline-flex items-center justify-center px-4 py-2 gradient-primary text-white text-xs font-bold rounded-lg shadow-glow hover:opacity-90 transition-opacity"
+            >
+              Go to Admin Panel
+            </Link>
+            <Link
+              to="/app"
+              className="w-full inline-flex items-center justify-center px-4 py-2 bg-muted hover:bg-muted/80 text-foreground text-xs font-bold rounded-lg transition-colors"
+            >
+              Go to App
+            </Link>
+          </div>
         </div>
       </div>
     );
@@ -185,13 +175,20 @@ function SuperAdminPanel() {
               <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-semibold">Workspace Management</p>
             </div>
           </div>
-          <button
-            onClick={handleLogout}
-            className="flex items-center gap-1.5 px-3 py-1.5 border border-border rounded-md text-xs font-medium hover:bg-muted text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
-          >
-            <LogOut className="size-3.5" />
-            Lock Panel
-          </button>
+          <div className="flex items-center gap-2">
+            <Link
+              to="/admin"
+              className="flex items-center gap-1.5 px-3 py-1.5 border border-border rounded-md text-xs font-medium hover:bg-muted text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+            >
+              Go to Admin
+            </Link>
+            <Link
+              to="/app"
+              className="flex items-center gap-1.5 px-3 py-1.5 border border-border rounded-md text-xs font-medium hover:bg-muted text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+            >
+              Go to App
+            </Link>
+          </div>
         </div>
       </header>
 
