@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Loader2, Plus } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { type TaskStatus } from "@/data/mock";
+import { type TaskStatus } from "@/types";
 import { KanbanBoard } from "@/components/shared/Kanban";
 import { DeleteTaskDialog, TaskFormDialog } from "@/components/shared/TaskFormDialog";
 import { getMe } from "@/services/auth.service";

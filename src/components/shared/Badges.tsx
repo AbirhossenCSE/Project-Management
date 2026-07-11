@@ -1,5 +1,6 @@
 import { cn } from "@/lib/utils";
-import type { Priority, ProjectStatus } from "@/data/mock";
+export type ProjectStatus = "on_track" | "at_risk" | "delayed" | "completed" | "active" | "on-hold";
+export type Priority = "low" | "medium" | "high" | "urgent";
 
 const tone = {
   success: "bg-success/10 text-success border-success/20",

@@ -1,7 +1,7 @@
 import { MessageSquare, Paperclip, Clock, MoreHorizontal, Plus, Pencil, Trash2, Loader2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
-import { type TaskStatus as LegacyTaskStatus } from "@/data/mock";
+import { type TaskStatus as LegacyTaskStatus } from "@/types";
 import { MemberAvatar } from "./Avatar";
 import { PriorityBadge, Tag } from "./Badges";
 import { updateTask } from "@/services/task.service";

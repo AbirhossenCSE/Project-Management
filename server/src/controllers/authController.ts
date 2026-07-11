@@ -229,4 +229,81 @@ export async function deleteUser(req: Request, res: Response): Promise<void> {
         console.error(error);
         res.status(500).json({ success: false, message: "Failed to delete user" });
     }
-}
+}
+
+export async function updateMe(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+        const currentUserId = req.userId;
+        if (!currentUserId) {
+            res.status(401).json({ success: false, message: "Unauthorized" });
+            return;
+        }
+        const { name } = req.body as { name?: string };
+        if (!name || name.trim().length < 2) {
+            res.status(400).json({ success: false, message: "Name must be at least 2 characters" });
+            return;
+        }
+
+        const user = await User.findById(currentUserId);
+        if (!user) {
+            res.status(404).json({ success: false, message: "User not found" });
+            return;
+        }
+
+        user.name = name.trim();
+        await user.save();
+
+        res.status(200).json({
+            success: true,
+            data: {
+                user: formatUser(user),
+            },
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: "Failed to update profile name" });
+    }
+}
+
+export async function changePassword(req: AuthenticatedRequest, res: Response): Promise<void> {
+    try {
+        const currentUserId = req.userId;
+        if (!currentUserId) {
+            res.status(401).json({ success: false, message: "Unauthorized" });
+            return;
+        }
+
+        const { currentPassword, newPassword } = req.body as { currentPassword?: string; newPassword?: string };
+
+        if (!currentPassword || !newPassword) {
+            res.status(400).json({ success: false, message: "Current password and new password are required" });
+            return;
+        }
+
+        if (newPassword.length < 8) {
+            res.status(400).json({ success: false, message: "New password must be at least 8 characters long" });
+            return;
+        }
+
+        const user = await User.findById(currentUserId).select("+password");
+        if (!user) {
+            res.status(404).json({ success: false, message: "User not found" });
+            return;
+        }
+
+        const isMatch = await bcrypt.compare(currentPassword, user.password);
+        if (!isMatch) {
+            res.status(400).json({ success: false, message: "Incorrect current password" });
+            return;
+        }
+
+        user.password = await bcrypt.hash(newPassword, 12);
+        await user.save();
+
+        res.status(200).json({ success: true, message: "Password updated successfully" });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: "Failed to change password" });
+    }
+}
+

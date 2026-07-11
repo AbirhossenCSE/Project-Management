@@ -42,6 +42,17 @@ export async function getMe() {
     return response.data;
 }
 
+export async function updateMe(name: string) {
+    const response = await api.patch<{ success: boolean; data: { user: AuthUser } }>("/auth/me", { name });
+    return response.data;
+}
+
+export async function changePassword(payload: { currentPassword?: string; newPassword?: string }) {
+    const response = await api.patch<{ success: boolean; message: string }>("/auth/change-password", payload);
+    return response.data;
+}
+
+
 export function logout() {
     if (typeof window !== "undefined") {
         window.localStorage.removeItem(tokenKey);

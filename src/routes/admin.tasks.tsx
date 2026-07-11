@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Filter, LayoutGrid, List, Loader2, Pencil, Plus, Search, Trash2 } from "lucide-react";
 import { useState } from "react";
-import { type TaskStatus } from "@/data/mock";
+import { type TaskStatus } from "@/types";
 import { KanbanBoard } from "@/components/shared/Kanban";
 import { PriorityBadge, TaskStatusBadge, Tag } from "@/components/shared/Badges";
 import { MemberAvatar } from "@/components/shared/Avatar";
