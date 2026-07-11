@@ -12,6 +12,17 @@ Designed with a clean UI, powerful dashboards, Kanban task management, and JWT a
 
 ---
 
+## 🔑 Demo Accounts
+
+| Role | Email | Password |
+|------|-------|----------|
+| Admin | test@test.com | 12345678 |
+| Super Admin | superadmin@gmail.com | Superadmin@123 |
+
+> Note: Register a new account to access as Member.
+
+---
+
 # ✨ Features
 
 ### 🔐 Authentication & Security
@@ -20,13 +31,21 @@ Designed with a clean UI, powerful dashboards, Kanban task management, and JWT a
 - Secure Protected Routes
 - Role-Based Authorization
 - Persistent Authentication
+- Password show/hide toggle on login/register
+- Password strength indicator on register
+
+### 👑 Super Admin & Role Management
+- Super Admin Panel (hidden `/superadmin` route)
+- User role promotion/demotion (promote member to admin)
+- User deletion by super admin
+- Automatic Super Admin account seeding on server start
 
 ### 👨‍💼 Admin Features
 - Interactive Admin Dashboard
 - Project Analytics
 - Project Health Monitoring
 - Create & Manage Projects
-- Assign Members to Projects
+- Assign Members to Projects during creation
 - Manage Users
 
 ### 👨‍💻 Member Features
@@ -35,13 +54,14 @@ Designed with a clean UI, powerful dashboards, Kanban task management, and JWT a
 - Task Management
 - Sprint Progress Tracking
 - Update Task Status
+- Member-only task filtering (members see only assigned tasks)
 
 ### 📋 Project Management
-- Create Projects
+- Create Projects with member assignment during creation
 - Edit Projects
-- Member Assignment
 - Project Progress Overview
 - Deadline Management
+- Search functionality (projects + tasks)
 
 ### ✅ Task Management
 - Kanban Board
@@ -57,10 +77,19 @@ Designed with a clean UI, powerful dashboards, Kanban task management, and JWT a
 
 ### 🎨 UI/UX
 - Modern Responsive Design
-- Dark Clean Interface
+- Dark/Light/System theme toggle
 - Mobile Friendly
 - Reusable Components
 - Fast Navigation
+
+---
+
+## 🔒 Super Admin Panel
+Access at `/superadmin` — only available to `superadmin@gmail.com`
+- View and manage all users
+- Change user roles (admin/member)
+- Delete users
+- Protected: secure email-based JWT access control
 
 ---
 
@@ -95,34 +124,25 @@ Designed with a clean UI, powerful dashboards, Kanban task management, and JWT a
 # 📂 Project Structure
 
 ```text
-Project-Management/
-│
-├── src/
-│   ├── assets/
-│   ├── components/
-│   ├── hooks/
-│   ├── lib/
-│   ├── routes/
-│   ├── services/
-│   ├── store/
-│   ├── types/
-│   ├── utils/
-│   ├── App.tsx
-│   └── main.tsx
-│
-├── server/
-│   └── src/
-│       ├── config/
-│       ├── controllers/
-│       ├── middleware/
-│       ├── models/
-│       ├── routes/
-│       ├── services/
-│       ├── utils/
-│       └── server.ts
-│
-├── package.json
-└── README.md
+src/
+├── components/
+│   ├── layout/     (AppShell, AuthLayout)
+│   ├── shared/     (Avatar, Kanban, Charts, etc.)
+│   └── ui/         (shadcn components)
+├── hooks/
+├── routes/
+│   ├── admin.*     (Admin pages)
+│   └── app.*       (Member pages)
+├── services/
+├── store/
+└── types/
+
+server/src/
+├── config/         (db, seedSuperAdmin)
+├── controllers/
+├── middleware/     (JWT auth)
+├── models/         (User, Project, Task, Sprint)
+└── routes/
 ```
 
 ---
@@ -222,7 +242,7 @@ Protected Routes
    │
    ▼
 Role Verification
-(Admin / Member)
+(Super Admin / Admin / Member)
 ```
 
 ---
@@ -230,6 +250,7 @@ Role Verification
 # 📸 Application Modules
 
 - 🔐 Authentication
+- 🔒 Super Admin Panel
 - 📊 Admin Dashboard
 - 👨‍💻 Member Dashboard
 - 📁 Project Management
@@ -249,28 +270,28 @@ Base URL
 http://localhost:5000/api/v1
 ```
 
-Example Endpoints
+Endpoints
 
 ```text
 POST    /auth/register
-
 POST    /auth/login
+GET     /auth/me
+PATCH   /auth/me
+PATCH   /auth/change-password
 
 GET     /projects
-
 POST    /projects
-
 PUT     /projects/:id
-
 DELETE  /projects/:id
 
 GET     /tasks
-
 POST    /tasks
-
 PUT     /tasks/:id
-
 DELETE  /tasks/:id
+
+GET     /users
+PATCH   /admin-panel/users/:id/role
+DELETE  /admin-panel/users/:id
 ```
 
 ---
