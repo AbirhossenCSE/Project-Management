@@ -7,6 +7,7 @@ import { useProjects, useSprints } from "@/hooks";
 import { ProjectGridSkeleton } from "@/components/shared/Skeleton";
 
 export const Route = createFileRoute("/app/sprints")({
+  head: () => ({ meta: [{ title: "My Sprints — Nexus.io" }] }),
   component: Sprints,
 });
 

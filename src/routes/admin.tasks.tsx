@@ -14,7 +14,7 @@ import { deleteTask } from "@/services/task.service";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/tasks")({
-  head: () => ({ meta: [{ title: "Tasks — Admin" }] }),
+  head: () => ({ meta: [{ title: "Tasks — Nexus.io" }] }),
   component: Tasks,
 });
 

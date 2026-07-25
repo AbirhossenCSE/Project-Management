@@ -4,7 +4,7 @@ import { ArrowRight, Shield, User, Trello, Zap, BarChart3, ShieldCheck, RefreshC
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Nexus.io — Minimal Project Management" },
+      { title: "Nexus.io — Project Management" },
       { name: "description", content: "A premium minimal project management system for modern teams." },
     ],
   }),

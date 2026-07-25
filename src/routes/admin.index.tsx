@@ -19,7 +19,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/")({
-  head: () => ({ meta: [{ title: "Admin Dashboard — Nexus.io" }] }),
+  head: () => ({ meta: [{ title: "Dashboard — Nexus.io" }] }),
   component: AdminDashboard,
 });
 

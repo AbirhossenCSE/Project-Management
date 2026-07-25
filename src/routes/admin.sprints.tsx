@@ -6,7 +6,7 @@ import { BurndownChart, VelocityBars } from "@/components/shared/Charts";
 import { useProjects, useSprints } from "@/hooks";
 
 export const Route = createFileRoute("/admin/sprints")({
-  head: () => ({ meta: [{ title: "Sprints — Admin" }] }),
+  head: () => ({ meta: [{ title: "Sprints — Nexus.io" }] }),
   component: Sprints,
 });
 

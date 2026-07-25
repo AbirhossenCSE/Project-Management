@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/app/activity")({
+  head: () => ({ meta: [{ title: "Activity — Nexus.io" }] }),
   component: () => (
     <div className="p-6 sm:p-8 space-y-6 max-w-[900px] mx-auto">
       <div>

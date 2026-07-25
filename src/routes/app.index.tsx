@@ -10,7 +10,8 @@ import { getMe } from "@/services/auth.service";
 import { useProjects, useTasks } from "@/hooks";
 
 export const Route = createFileRoute("/app/")({
-    component: UserDashboard,
+  head: () => ({ meta: [{ title: "My Dashboard — Nexus.io" }] }),
+  component: UserDashboard,
 });
 
 function UserDashboard() {

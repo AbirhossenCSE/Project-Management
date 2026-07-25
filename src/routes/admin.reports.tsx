@@ -8,7 +8,7 @@ import { ProgressBar } from "@/components/shared/Progress";
 import { MemberAvatar } from "@/components/shared/Avatar";
 
 export const Route = createFileRoute("/admin/reports")({
-  head: () => ({ meta: [{ title: "Reports — Admin" }] }),
+  head: () => ({ meta: [{ title: "Reports — Nexus.io" }] }),
   component: Reports,
 });
 
@@ -74,7 +74,7 @@ function Reports() {
     const activeProjects = projects.filter(p => p.status === "active").length;
     const completedProjects = projects.filter(p => p.status === "completed").length;
 
-    const health = totalProjects > 0 
+    const health = totalProjects > 0
       ? Math.round(((activeProjects + completedProjects) / totalProjects) * 100)
       : 100;
 
@@ -86,7 +86,7 @@ function Reports() {
       }).length;
       return acc + val;
     }, 0);
-    const avgVelocity = completedSprints.length > 0 
+    const avgVelocity = completedSprints.length > 0
       ? (totalVelocity / completedSprints.length).toFixed(1)
       : "0.0";
 

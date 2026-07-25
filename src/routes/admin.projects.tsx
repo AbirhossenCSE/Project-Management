@@ -18,7 +18,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin/projects")({
-  head: () => ({ meta: [{ title: "Projects — Admin" }] }),
+  head: () => ({ meta: [{ title: "Projects — Nexus.io" }] }),
   component: Projects,
 });
 

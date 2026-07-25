@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 import { useProjects, useTasks, useSprints } from "@/hooks";
 
 export const Route = createFileRoute("/admin/projects/$projectId")({
-  head: ({ params }) => ({ meta: [{ title: `${params.projectId} — Project` }] }),
+  head: () => ({ meta: [{ title: "Project Details — Nexus.io" }] }),
   component: ProjectDetails,
 });
 
@@ -187,7 +187,7 @@ function ProjectDetails() {
           {projectSprints.map((s) => {
             const startStr = s.startDate ? new Date(s.startDate).toLocaleDateString() : "TBD";
             const endStr = s.endDate ? new Date(s.endDate).toLocaleDateString() : "TBD";
-            
+
             const sprintTasks = projectTasks.filter(t => s.tasks.includes(t._id));
             const sTasksDone = sprintTasks.filter(t => t.status === "done").length;
             const totalPoints = sprintTasks.length * 3 || 10;

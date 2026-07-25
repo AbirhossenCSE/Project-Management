@@ -5,7 +5,7 @@ import { AppShell } from "@/components/layout/AppShell";
 import { getMe } from "@/services/auth.service";
 
 export const Route = createFileRoute("/admin")({
-  head: () => ({ meta: [{ title: "Admin — Nexus.io" }] }),
+  head: () => ({ meta: [{ title: "Admin Console — Nexus.io" }] }),
   component: AdminLayout,
 });
 

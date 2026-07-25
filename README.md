@@ -301,7 +301,6 @@ DELETE  /admin-panel/users/:id
 - Notifications
 - File Uploads
 - Team Chat
-- Calendar Integration
 - Activity Timeline
 - Email Invitations
 - Comments System

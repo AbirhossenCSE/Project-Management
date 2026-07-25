@@ -9,7 +9,7 @@ type ApiError = {
 };
 
 export const Route = createFileRoute("/register")({
-  head: () => ({ meta: [{ title: "Create account — Nexus.io" }] }),
+  head: () => ({ meta: [{ title: "Create Account — Nexus.io" }] }),
   component: Register,
 });
 

@@ -10,6 +10,7 @@ import { TaskTableSkeleton } from "@/components/shared/Skeleton";
 import type { TaskItem } from "@/hooks/useTasks";
 
 export const Route = createFileRoute("/app/tasks")({
+  head: () => ({ meta: [{ title: "My Tasks — Nexus.io" }] }),
   component: MyTasks,
 });
 

@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { AuthButton, AuthInput, AuthLayout } from "@/components/layout/AuthLayout";
 
 export const Route = createFileRoute("/forgot-password")({
-  head: () => ({ meta: [{ title: "Forgot password — Nexus.io" }] }),
+  head: () => ({ meta: [{ title: "Forgot Password — Nexus.io" }] }),
   component: Forgot,
 });
 

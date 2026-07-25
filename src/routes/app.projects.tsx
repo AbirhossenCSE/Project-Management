@@ -8,7 +8,8 @@ import { getMe } from "@/services/auth.service";
 import { useProjects } from "@/hooks";
 
 export const Route = createFileRoute("/app/projects")({
-    component: Projects,
+  head: () => ({ meta: [{ title: "My Projects — Nexus.io" }] }),
+  component: Projects,
 });
 
 function Projects() {

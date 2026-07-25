@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { MemberAvatar } from "@/components/shared/Avatar";
 
 export const Route = createFileRoute("/admin/settings")({
-  head: () => ({ meta: [{ title: "Settings — Admin" }] }),
+  head: () => ({ meta: [{ title: "Settings — Nexus.io" }] }),
   component: Settings,
 });
 
@@ -214,7 +214,7 @@ function Settings() {
                   <Field label="Full Name" value={name} onChange={(e) => setName(e.target.value)} />
                   <Field label="Email Address" value={user?.email || ""} disabled />
                   <Field label="Role" value={user?.role || ""} disabled />
-                  
+
                   <div>
                     <div className="text-xs font-medium mb-1.5">Default timezone</div>
                     <select
@@ -288,8 +288,8 @@ function Settings() {
                         </div>
                         <span className={cn(
                           "inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider",
-                          member.role === "admin" 
-                            ? "bg-purple-500/10 text-purple-600 border border-purple-500/20" 
+                          member.role === "admin"
+                            ? "bg-purple-500/10 text-purple-600 border border-purple-500/20"
                             : "bg-blue-500/10 text-blue-600 border border-blue-500/20"
                         )}>
                           {member.role}

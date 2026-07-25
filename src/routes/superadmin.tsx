@@ -8,7 +8,7 @@ import { useAuthUser } from "@/components/layout/auth-user-context";
 import { getMe, type AuthUser } from "@/services/auth.service";
 
 export const Route = createFileRoute("/superadmin")({
-  head: () => ({ meta: [{ title: "Super Admin Panel — Nexus.io" }] }),
+  head: () => ({ meta: [{ title: "Super Admin — Nexus.io" }] }),
   component: SuperAdminPanel,
 });
 

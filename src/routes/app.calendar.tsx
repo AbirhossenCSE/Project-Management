@@ -5,7 +5,8 @@ import { getMe } from "@/services/auth.service";
 import { useTasks } from "@/hooks";
 
 export const Route = createFileRoute("/app/calendar")({
-    component: Calendar,
+  head: () => ({ meta: [{ title: "Calendar — Nexus.io" }] }),
+  component: Calendar,
 });
 
 function Calendar() {

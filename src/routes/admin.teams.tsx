@@ -6,7 +6,7 @@ import { Tag } from "@/components/shared/Badges";
 import { useUsers } from "@/hooks";
 
 export const Route = createFileRoute("/admin/teams")({
-  head: () => ({ meta: [{ title: "Teams — Admin" }] }),
+  head: () => ({ meta: [{ title: "Teams — Nexus.io" }] }),
   component: Teams,
 });
 
